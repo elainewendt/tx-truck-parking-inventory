@@ -24,13 +24,35 @@
 <div id="viewDiv"></div>
 
 <script>
+<script>
 require([
   "esri/Map",
-  "esri/views/MapView"
-], function(Map, MapView) {
+  "esri/views/MapView",
+  "esri/layers/FeatureLayer"
+], function(Map, MapView, FeatureLayer) {
+
+  const truckLayer = new FeatureLayer({
+    url: "https://services.arcgis.com/KTcxiTD9dsQw4r7Z/arcgis/rest/services/Truck_Parking_Inventory/FeatureServer/2",
+    outFields: ["*"],
+    popupTemplate: {
+      title: "{CITY_NM}",
+      content: `
+        <b>County:</b> {CNTY_NM}<br>
+        <b>District:</b> {DIST_NM}<br>
+        <b>Parking Spaces:</b> {Parking_Inventory}<br>
+        <b>Ownership:</b> {OWNERSHIP}<br>
+        <b>Nearest Interstate:</b> {NEAREST_IH}<br>
+        <b>24 Hour:</b> {OPENTWNTYFOURHOUR}<br>
+        <b>Repair Facilities:</b> {REPAIRFACILITIES}<br>
+        <b>Heavy Duty Fuel:</b> {HEAVYDUTYLIQUIDFUEL}<br>
+        <b>Heavy Duty EV:</b> {HEAVYDUTY_EVCHARGE}
+      `
+    }
+  });
 
   const map = new Map({
-    basemap: "streets"
+    basemap: "streets-navigation-vector",
+    layers: [truckLayer]
   });
 
   const view = new MapView({
@@ -41,6 +63,7 @@ require([
   });
 
 });
+</script>
 </script>
 
 </body>
