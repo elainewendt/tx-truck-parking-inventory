@@ -4,14 +4,15 @@
   <meta charset="utf-8" />
   <title>Texas Truck Parking Dashboard</title>
 
-  <link rel="stylesheet" href="https://js.arcgis.com/4.31/esri/themes/light/main.css">
+  <link rel="stylesheet"
+        href="https://js.arcgis.com/4.31/esri/themes/light/main.css">
 
   <style>
     html, body, #viewDiv {
-      padding: 0;
       margin: 0;
-      height: 100%;
+      padding: 0;
       width: 100%;
+      height: 100%;
     }
   </style>
 
@@ -26,7 +27,7 @@
 require([
   "esri/Map",
   "esri/views/MapView"
-], (Map, MapView) => {
+], function(Map, MapView) {
 
   const map = new Map({
     basemap: "streets"
