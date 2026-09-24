@@ -1,18 +1,67 @@
 <!DOCTYPE html>
 <html>
+
 <head>
-  <meta charset="utf-8" />
-  <title>Texas Truck Parking Dashboard</title>
+  <meta charset="utf-8">
+  <title>Texas Truck Parking Inventory Dashboard</title>
 
   <link rel="stylesheet"
         href="https://js.arcgis.com/4.31/esri/themes/light/main.css">
 
   <style>
-    html, body, #viewDiv {
+    html, body {
       margin: 0;
       padding: 0;
-      width: 100%;
       height: 100%;
+      width: 100%;
+      font-family: Arial, sans-serif;
+    }
+
+    #header {
+      height: 60px;
+      background: #005a9c;
+      color: white;
+      display: flex;
+      align-items: center;
+      padding-left: 20px;
+      font-size: 22px;
+      font-weight: bold;
+    }
+
+    #container {
+      display: flex;
+      height: calc(100% - 60px);
+    }
+
+    #sidebar {
+      width: 320px;
+      background: #f5f5f5;
+      padding: 15px;
+      overflow-y: auto;
+      box-sizing: border-box;
+    }
+
+    #viewDiv {
+      flex: 1;
+    }
+
+    .card {
+      background: white;
+      padding: 12px;
+      margin-bottom: 12px;
+      border-radius: 8px;
+      box-shadow: 0 2px 5px rgba(0,0,0,.15);
+    }
+
+    .title {
+      font-size: 14px;
+      color: #666;
+    }
+
+    .metric {
+      font-size: 30px;
+      font-weight: bold;
+      color: #005a9c;
     }
   </style>
 
@@ -21,50 +70,147 @@
 
 <body>
 
-<div id="viewDiv"></div>
+  <div id="header">
+    Texas Truck Parking Inventory Dashboard
+  </div>
 
-<script>
-require([
-  "esri/Map",
-  "esri/views/MapView",
-  "esri/layers/FeatureLayer"
-], function(Map, MapView, FeatureLayer) {
+  <div id="container">
 
-  const truckLayer = new FeatureLayer({
-    url: "https://services.arcgis.com/KTcxiTD9dsQw4r7Z/arcgis/rest/services/Truck_Parking_Inventory/FeatureServer/2",
-    outFields: ["*"],
-    popupTemplate: {
-      title: "{CITY_NM}",
-      content: `
-        <b>County:</b> {CNTY_NM}<br>
-        <b>District:</b> {DIST_NM}<br>
-        <b>Parking Spaces:</b> {INV_SPC_CT}<br>
-        <b>Ownership:</b> {OWNERSHIP}<br>
-        <b>Nearest Interstate:</b> {NEAREST_IH}<br>
-        <b>24 Hour:</b> {OPENTWNTYFOURHOUR}<br>
-        <b>Repair Facilities:</b> {REPAIRFACILITIES}<br>
-        <b>Heavy Duty Fuel:</b> {HEAVYDUTYLIQUIDFUEL}<br>
-        <b>Heavy Duty EV:</b> {HEAVYDUTY_EVCHARGE}
-      `
-    }
-  });
+    <div id="sidebar">
 
-  const map = new Map({
-    basemap: "streets-navigation-vector",
-    layers: [truckLayer]
-  });
+      <div class="card">
+        <div class="title">Total Facilities</div>
+        <div id="facilityCount" class="metric">...</div>
+      </div>
 
-  const view = new MapView({
-    container: "viewDiv",
-    map: map,
-    center: [-99, 31],
-    zoom: 6
-  });
+      <div class="card">
+        <div class="title">Total Parking Spaces</div>
+        <div id="spaceCount" class="metric">...</div>
+      </div>
 
+      <div class="card">
+        <div class="title">Layer Status</div>
+        <div id="status">Loading...</div>
+      </div>
 
+    </div>
 
-  });
-</script>
+    <div id="viewDiv"></div>
+
+  </div>
+
+  <script>
+
+    require([
+      "esri/Map",
+      "esri/views/MapView",
+      "esri/layers/FeatureLayer"
+    ], function (Map, MapView, FeatureLayer) {
+
+      const truckLayer = new FeatureLayer({
+
+        url: "https://services.arcgis.com/KTcxiTD9dsQw4r7Z/arcgis/rest/services/Truck_Parking_Inventory/FeatureServer/2",
+
+        outFields: ["*"],
+
+        renderer: {
+          type: "simple",
+          symbol: {
+            type: "simple-fill",
+            color: [0, 120, 255, 0.35],
+            outline: {
+              color: [0, 0, 0, 1],
+              width: 1
+            }
+          }
+        },
+
+        popupTemplate: {
+          title: "{CITY_NM}",
+          content: `
+            <b>County:</b> {CNTY_NM}<br>
+            <b>District:</b> {DIST_NM}<br>
+            <b>Parking Spaces:</b> {Parking_Inventory}<br>
+            <b>Ownership:</b> {OWNERSHIP}<br>
+            <b>Nearest Interstate:</b> {NEAREST_IH}<br>
+            <b>24 Hour:</b> {OPENTWNTYFOURHOUR}<br>
+            <b>Repair Facilities:</b> {REPAIRFACILITIES}<br>
+            <b>Heavy Duty Fuel:</b> {HEAVYDUTYLIQUIDFUEL}<br>
+            <b>Heavy Duty EV:</b> {HEAVYDUTY_EVCHARGE}
+          `
+        }
+
+      });
+
+      const map = new Map({
+        basemap: "hybrid",
+        layers: [truckLayer]
+      });
+
+      const view = new MapView({
+        container: "viewDiv",
+        map: map
+      });
+
+      truckLayer.when(async () => {
+
+        document.getElementById("status").innerHTML =
+          "Layer Loaded";
+
+        try {
+
+          const count =
+            await truckLayer.queryFeatureCount();
+
+          document.getElementById("facilityCount").innerHTML =
+            count.toLocaleString();
+
+          const results =
+            await truckLayer.queryFeatures({
+              where: "1=1",
+              outFields: ["Parking_Inventory"],
+              returnGeometry: false
+            });
+
+          let totalSpaces = 0;
+
+          results.features.forEach(f => {
+            totalSpaces +=
+              f.attributes.Parking_Inventory || 0;
+          });
+
+          document.getElementById("spaceCount").innerHTML =
+            totalSpaces.toLocaleString();
+
+          await view.goTo(truckLayer.fullExtent);
+
+          console.log(
+            "Feature count:",
+            count
+          );
+
+        }
+        catch (err) {
+
+          console.error(err);
+
+          document.getElementById("status").innerHTML =
+            "Query Error";
+
+        }
+
+      }).catch(err => {
+
+        console.error(err);
+
+        document.getElementById("status").innerHTML =
+          "Layer Failed";
+
+      });
+
+    });
+
+  </script>
 
 </body>
 </html>
