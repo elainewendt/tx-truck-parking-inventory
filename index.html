@@ -113,17 +113,20 @@
 
         outFields: ["*"],
 
-        renderer: {
-          type: "simple",
-          symbol: {
-            type: "simple-fill",
-            color: [0, 120, 255, 0.35],
-            outline: {
-              color: [0, 0, 0, 1],
-              width: 1
-            }
-          }
-        },
+const view = new MapView({
+  container: "viewDiv",
+  map: map
+});
+
+view.when(async () => {
+
+  const extent = await truckLayer.queryExtent();
+
+  console.log(extent);
+
+  view.goTo(extent.extent.expand(1.2));
+
+});
 
         popupTemplate: {
           title: "{CITY_NM}",
