@@ -142,6 +142,19 @@
 
       });
 
+      truckLayer.when(function() {
+  console.log("Layer loaded");
+  console.log("Full extent:", truckLayer.fullExtent);
+});
+
+truckLayer.queryFeatureCount()
+  .then(function(count) {
+    console.log("Feature count:", count);
+  })
+  .catch(function(error) {
+    console.error("Query error:", error);
+  });
+
       const map = new Map({
         basemap: "hybrid",
         layers: [truckLayer]
