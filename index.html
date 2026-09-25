@@ -1,2075 +1,1840 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 
-<title>Texas Truck Parking Inventory</title>
+  <title>Texas Truck Parking Inventory</title>
 
-<!-- ArcGIS Maps SDK -->
-<link rel="stylesheet"
-      href="https://js.arcgis.com/4.34/esri/themes/light/main.css">
+  <!-- Leaflet -->
+  <link
+    rel="stylesheet"
+    href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
+    integrity="sha256-p4NxAoJBhIINfQ3s5lR5zY5q5Y7mY6v5Y5Y5Y5Y5Y5Y="
+    crossorigin=""
+  />
 
-<script type="module"
-        src="https://js.arcgis.com/4.34/"></script>
+  <style>
+    :root {
+      --navy: #123b5d;
+      --navy-dark: #0b2940;
+      --orange: #c65d1e;
+      --black: #111111;
+      --white: #ffffff;
+      --red: #8b2e2e;
+      --grey: #6b7280;
+      --light-grey: #eef1f4;
+      --border: #d7dce1;
+      --success: #286b4f;
+    }
 
-<!-- Chart.js -->
-<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    * {
+      box-sizing: border-box;
+    }
 
-<style>
-* {
-  box-sizing: border-box;
-}
+    body {
+      margin: 0;
+      font-family:
+        Inter,
+        ui-sans-serif,
+        system-ui,
+        -apple-system,
+        BlinkMacSystemFont,
+        "Segoe UI",
+        sans-serif;
+      background: #f3f5f7;
+      color: var(--black);
+    }
 
-html, body {
-  margin: 0;
-  padding: 0;
-  font-family: Arial, Helvetica, sans-serif;
-  background: #eef2f5;
-  color: #17202a;
-}
+    /* ------------------------------
+       HEADER
+    ------------------------------ */
 
-.header {
-  background: #123b56;
-  color: white;
-  padding: 22px 30px;
-}
+    .header {
+      background: linear-gradient(
+        135deg,
+        var(--navy-dark),
+        var(--navy)
+      );
+      color: var(--white);
+      padding: 24px 32px;
+      border-bottom: 5px solid var(--orange);
+    }
 
-.header h1 {
-  margin: 0;
-  font-size: 28px;
-}
+    .header-inner {
+      max-width: 1600px;
+      margin: 0 auto;
+    }
 
-.header p {
-  margin: 5px 0 0;
-  opacity: .85;
-}
+    .header h1 {
+      margin: 0;
+      font-size: 32px;
+      font-weight: 700;
+      letter-spacing: -0.5px;
+    }
 
-.container {
-  max-width: 1800px;
-  margin: auto;
-  padding: 20px;
-}
+    .header p {
+      margin: 7px 0 0;
+      color: #d9e4ed;
+      font-size: 14px;
+    }
 
-/* CONNECTION */
+    /* ------------------------------
+       MAIN LAYOUT
+    ------------------------------ */
 
-.connection {
-  background: white;
-  border-radius: 12px;
-  padding: 13px 17px;
-  margin-bottom: 15px;
-  box-shadow: 0 2px 8px rgba(0,0,0,.06);
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  font-size: 14px;
-}
+    .dashboard {
+      max-width: 1600px;
+      margin: 0 auto;
+      padding: 20px;
+    }
 
-.status-dot {
-  width: 11px;
-  height: 11px;
-  border-radius: 50%;
-  background: #f39c12;
-  flex: 0 0 auto;
-}
+    /* ------------------------------
+       FILTERS
+    ------------------------------ */
 
-.status-success {
-  background: #20a36a;
-}
+    .filter-panel {
+      background: var(--white);
+      border-radius: 10px;
+      padding: 18px 20px;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.07);
+      margin-bottom: 20px;
+    }
 
-.status-error {
-  background: #e74c3c;
-}
+    .filter-title {
+      color: var(--navy);
+      font-size: 15px;
+      font-weight: 700;
+      margin-bottom: 12px;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
 
-/* PANELS */
+    .filters {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(180px, 1fr)) auto;
+      gap: 14px;
+      align-items: end;
+    }
 
-.panel {
-  background: white;
-  border-radius: 12px;
-  padding: 18px;
-  box-shadow: 0 2px 10px rgba(0,0,0,.06);
-}
+    .filter-group label {
+      display: block;
+      color: var(--grey);
+      font-size: 12px;
+      font-weight: 700;
+      margin-bottom: 6px;
+      text-transform: uppercase;
+    }
 
-.panel h2 {
-  margin: 0 0 15px;
-  font-size: 18px;
-}
+    select {
+      width: 100%;
+      height: 42px;
+      padding: 0 12px;
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      background: var(--white);
+      color: var(--black);
+      font-size: 14px;
+      cursor: pointer;
+    }
 
-/* FILTERS */
+    select:focus {
+      outline: 2px solid rgba(198, 93, 30, 0.25);
+      border-color: var(--orange);
+    }
 
-.filters {
-  margin-bottom: 18px;
-}
+    .reset-button {
+      height: 42px;
+      padding: 0 20px;
+      border: none;
+      border-radius: 6px;
+      background: var(--orange);
+      color: var(--white);
+      font-weight: 700;
+      cursor: pointer;
+      transition: 0.15s ease;
+    }
 
-.filter-grid {
-  display: grid;
-  grid-template-columns:
-    repeat(4, minmax(150px, 1fr))
-    150px;
-  gap: 12px;
-}
+    .reset-button:hover {
+      background: #a94d18;
+    }
 
-select,
-button {
-  width: 100%;
-  min-height: 42px;
-  border-radius: 7px;
-  border: 1px solid #ccd5dc;
-  padding: 9px 12px;
-  font-size: 14px;
-  background: white;
-}
+    /* ------------------------------
+       KPI CARDS
+    ------------------------------ */
 
-button {
-  border: none;
-  background: #187db8;
-  color: white;
-  font-weight: bold;
-  cursor: pointer;
-}
+    .kpi-grid {
+      display: grid;
+      grid-template-columns: repeat(5, 1fr);
+      gap: 15px;
+      margin-bottom: 20px;
+    }
 
-button:hover {
-  background: #126494;
-}
+    .kpi {
+      background: var(--white);
+      border-radius: 10px;
+      padding: 18px;
+      min-height: 125px;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.07);
+      border-top: 4px solid var(--navy);
+    }
 
-/* ERROR */
+    .kpi:nth-child(2) {
+      border-top-color: var(--orange);
+    }
 
-#errorBox {
-  display: none;
-  background: #fff0f0;
-  border: 1px solid #e2aaaa;
-  color: #842020;
-  padding: 15px;
-  border-radius: 10px;
-  margin-bottom: 18px;
-  white-space: pre-wrap;
-  word-break: break-word;
-}
+    .kpi:nth-child(3) {
+      border-top-color: var(--red);
+    }
 
-/* KPIs */
+    .kpi:nth-child(4) {
+      border-top-color: var(--grey);
+    }
 
-.kpi-grid {
-  display: grid;
-  grid-template-columns: repeat(5, 1fr);
-  gap: 14px;
-  margin-bottom: 18px;
-}
+    .kpi:nth-child(5) {
+      border-top-color: var(--black);
+    }
 
-.kpi {
-  background: white;
-  border-radius: 12px;
-  padding: 20px;
-  min-height: 115px;
-  box-shadow: 0 2px 10px rgba(0,0,0,.06);
-}
+    .kpi-label {
+      color: var(--grey);
+      font-size: 12px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.4px;
+    }
 
-.kpi-label {
-  font-size: 12px;
-  color: #65727e;
-  text-transform: uppercase;
-  letter-spacing: .5px;
-}
+    .kpi-value {
+      color: var(--navy-dark);
+      font-size: 30px;
+      line-height: 1.1;
+      font-weight: 800;
+      margin-top: 12px;
+    }
 
-.kpi-value {
-  margin-top: 10px;
-  font-size: 29px;
-  font-weight: bold;
-  color: #123b56;
-}
+    .kpi-subtitle {
+      color: var(--grey);
+      font-size: 11px;
+      margin-top: 6px;
+    }
 
-/* MAIN */
+    /* ------------------------------
+       MAP / CHARTS
+    ------------------------------ */
 
-.main-grid {
-  display: grid;
-  grid-template-columns: 2fr 1fr;
-  gap: 18px;
-  margin-bottom: 18px;
-}
+    .content-grid {
+      display: grid;
+      grid-template-columns: minmax(0, 1.35fr) minmax(400px, 0.65fr);
+      gap: 20px;
+    }
 
-#viewDiv {
-  width: 100%;
-  height: 600px;
-  border-radius: 9px;
-  overflow: hidden;
-}
+    .panel {
+      background: var(--white);
+      border-radius: 10px;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.07);
+      overflow: hidden;
+    }
 
-/* SUMMARY */
+    .panel-header {
+      padding: 15px 18px;
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
 
-.summary-item {
-  display: flex;
-  justify-content: space-between;
-  gap: 15px;
-  padding: 11px 0;
-  border-bottom: 1px solid #e6e9ec;
-}
+    .panel-header h2 {
+      margin: 0;
+      color: var(--navy);
+      font-size: 16px;
+    }
 
-.summary-item:last-child {
-  border-bottom: none;
-}
+    .panel-header span {
+      color: var(--grey);
+      font-size: 11px;
+    }
 
-.summary-label {
-  font-weight: bold;
-}
+    #map {
+      width: 100%;
+      height: 650px;
+    }
 
-.summary-value {
-  color: #123b56;
-  font-weight: bold;
-  text-align: right;
-}
+    .charts {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 20px;
+    }
 
-.info-box {
-  margin-top: 20px;
-  background: #f5f8fa;
-  border-radius: 8px;
-  padding: 14px;
-  font-size: 13px;
-  line-height: 1.7;
-}
+    .chart-container {
+      height: 300px;
+      padding: 12px 18px 18px;
+      position: relative;
+    }
 
-/* CHARTS */
+    /* ------------------------------
+       STATUS
+    ------------------------------ */
 
-.charts-grid {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 18px;
-}
+    .status {
+      margin-top: 20px;
+      background: var(--white);
+      border-radius: 8px;
+      padding: 12px 16px;
+      color: var(--grey);
+      font-size: 12px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
 
-.chart-container {
-  position: relative;
-  height: 310px;
-}
+    .status-dot {
+      width: 9px;
+      height: 9px;
+      border-radius: 50%;
+      background: var(--success);
+    }
 
-/* RESPONSIVE */
+    .status-dot.loading {
+      background: var(--orange);
+    }
 
-@media(max-width: 1200px) {
-  .kpi-grid {
-    grid-template-columns: repeat(3, 1fr);
-  }
+    .status-dot.error {
+      background: var(--red);
+    }
 
-  .main-grid {
-    grid-template-columns: 1fr;
-  }
+    /* ------------------------------
+       MAP POPUP
+    ------------------------------ */
 
-  .filter-grid {
-    grid-template-columns: repeat(2, 1fr);
-  }
-}
+    .popup-title {
+      font-weight: 800;
+      color: var(--navy);
+      font-size: 15px;
+      margin-bottom: 8px;
+    }
 
-@media(max-width: 700px) {
-  .container {
-    padding: 10px;
-  }
+    .popup-row {
+      display: flex;
+      justify-content: space-between;
+      gap: 20px;
+      padding: 3px 0;
+      font-size: 12px;
+    }
 
-  .kpi-grid {
-    grid-template-columns: 1fr 1fr;
-  }
+    .popup-label {
+      color: var(--grey);
+    }
 
-  .filter-grid {
-    grid-template-columns: 1fr;
-  }
+    .popup-value {
+      font-weight: 600;
+      text-align: right;
+    }
 
-  .charts-grid {
-    grid-template-columns: 1fr;
-  }
+    /* ------------------------------
+       LOADING OVERLAY
+    ------------------------------ */
 
-  #viewDiv {
-    height: 450px;
-  }
-}
-</style>
+    .loading-overlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(11, 41, 64, 0.55);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 9999;
+      color: white;
+    }
+
+    .loading-box {
+      background: var(--white);
+      color: var(--navy);
+      border-radius: 10px;
+      padding: 25px 35px;
+      text-align: center;
+      box-shadow: 0 8px 30px rgba(0, 0, 0, 0.25);
+    }
+
+    .spinner {
+      width: 35px;
+      height: 35px;
+      margin: 0 auto 12px;
+      border: 4px solid #e5e7eb;
+      border-top-color: var(--orange);
+      border-radius: 50%;
+      animation: spin 0.8s linear infinite;
+    }
+
+    @keyframes spin {
+      to {
+        transform: rotate(360deg);
+      }
+    }
+
+    .hidden {
+      display: none !important;
+    }
+
+    /* ------------------------------
+       RESPONSIVE
+    ------------------------------ */
+
+    @media (max-width: 1200px) {
+      .kpi-grid {
+        grid-template-columns: repeat(3, 1fr);
+      }
+
+      .content-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .charts {
+        grid-template-columns: repeat(2, 1fr);
+      }
+    }
+
+    @media (max-width: 750px) {
+      .header {
+        padding: 20px;
+      }
+
+      .header h1 {
+        font-size: 24px;
+      }
+
+      .dashboard {
+        padding: 12px;
+      }
+
+      .filters {
+        grid-template-columns: 1fr;
+      }
+
+      .kpi-grid {
+        grid-template-columns: 1fr 1fr;
+      }
+
+      .charts {
+        grid-template-columns: 1fr;
+      }
+
+      #map {
+        height: 450px;
+      }
+    }
+
+    @media (max-width: 480px) {
+      .kpi-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+  </style>
 </head>
 
 <body>
 
-<div class="header">
-  <h1>Texas Truck Parking Inventory</h1>
-</div>
-
-<div class="container">
-
-  <!-- CONNECTION STATUS -->
-  <div class="connection">
-    <div id="statusDot" class="status-dot"></div>
-    <div id="connectionText">
-      Connecting to ArcGIS Online...
-    </div>
-  </div>
-
-  <!-- FILTERS -->
-  <div class="panel filters">
-
-    <h2>Filters</h2>
-
-    <div class="filter-grid">
-
-      <select id="countyFilter">
-        <option value="">All Counties</option>
-      </select>
-
-      <select id="districtFilter">
-        <option value="">All Districts</option>
-      </select>
-
-      <select id="cityFilter">
-        <option value="">All Cities</option>
-      </select>
-
-      <select id="ownershipFilter">
-        <option value="">All Ownership Types</option>
-      </select>
-
-      <button id="resetButton">
-        Reset Filters
-      </button>
-
-    </div>
-  </div>
-
-  <!-- ERROR -->
-  <div id="errorBox"></div>
-
-  <!-- KPI CARDS -->
-  <div class="kpi-grid">
-
-    <div class="kpi">
-      <div class="kpi-label">Total Locations</div>
-      <div class="kpi-value" id="totalLocations">--</div>
-    </div>
-
-    <div class="kpi">
-      <div class="kpi-label">Parking Inventory</div>
-      <div class="kpi-value" id="totalParking">--</div>
-    </div>
-
-    <div class="kpi">
-      <div class="kpi-label">Total Area (Sq Ft)</div>
-      <div class="kpi-value" id="totalArea">--</div>
-    </div>
-
-    <div class="kpi">
-      <div class="kpi-label">24 Hour Locations</div>
-      <div class="kpi-value" id="open24">--</div>
-    </div>
-
-    <div class="kpi">
-      <div class="kpi-label">EV Charging Locations</div>
-      <div class="kpi-value" id="evLocations">--</div>
-    </div>
-
-  </div>
-
-  <!-- MAP / SUMMARY -->
-  <div class="main-grid">
-
-    <div class="panel">
-      <h2>GIS Map</h2>
-      <div id="viewDiv"></div>
-    </div>
-
-    <div class="panel">
-
-      <h2>Summary</h2>
-
+  <!-- ==============================
+       HEADER
+  =============================== -->
+  <header class="header">
+    <div class="header-inner">
+      <h1>Texas Truck Parking Inventory</h1>
       <p>
-        Use the filters to explore the GIS dataset.
-        Click a feature on the map to inspect an individual
-        location.
+        Truck parking facilities and inventory across Texas
       </p>
+    </div>
+  </header>
 
-      <hr>
+  <main class="dashboard">
 
-      <div class="summary-item">
-        <span class="summary-label">Selected Locations</span>
-        <span class="summary-value" id="summaryLocations">--</span>
+    <!-- ==============================
+         FILTERS
+    =============================== -->
+    <section class="filter-panel">
+
+      <div class="filter-title">
+        Filter Inventory
       </div>
 
-      <div class="summary-item">
-        <span class="summary-label">Parking Spaces</span>
-        <span class="summary-value" id="summaryParking">--</span>
-      </div>
+      <div class="filters">
 
-      <div class="summary-item">
-        <span class="summary-label">Total Area</span>
-        <span class="summary-value" id="summaryArea">--</span>
-      </div>
+        <div class="filter-group">
+          <label for="districtFilter">District</label>
+          <select id="districtFilter">
+            <option value="">All Districts</option>
+          </select>
+        </div>
 
-      <div class="summary-item">
-        <span class="summary-label">EV Charging</span>
-        <span class="summary-value" id="summaryEV">--</span>
-      </div>
+        <div class="filter-group">
+          <label for="countyFilter">County</label>
+          <select id="countyFilter">
+            <option value="">All Counties</option>
+          </select>
+        </div>
 
-      <div class="summary-item">
-        <span class="summary-label">Repair Facilities</span>
-        <span class="summary-value" id="summaryRepair">--</span>
-      </div>
+        <div class="filter-group">
+          <label for="cityFilter">City</label>
+          <select id="cityFilter">
+            <option value="">All Cities</option>
+          </select>
+        </div>
 
-      <div class="info-box">
-
-        <strong>Data Source</strong><br>
-        ArcGIS Online Feature Service
-
-        <br><br>
-
-        <strong>Records:</strong>
-        <span id="recordCount">--</span>
-
-        <br>
-
-        <strong>Current Filter:</strong>
-        <span id="currentFilter">All Records</span>
+        <button
+          id="resetButton"
+          class="reset-button"
+          type="button"
+        >
+          Reset Filters
+        </button>
 
       </div>
+    </section>
 
+
+    <!-- ==============================
+         KPI CARDS
+    =============================== -->
+    <section class="kpi-grid">
+
+      <div class="kpi">
+        <div class="kpi-label">Total Parking Spaces</div>
+        <div class="kpi-value" id="totalSpaces">—</div>
+        <div class="kpi-subtitle">Inventory spaces</div>
+      </div>
+
+      <div class="kpi">
+        <div class="kpi-label">Parking Locations</div>
+        <div class="kpi-value" id="totalLocations">—</div>
+        <div class="kpi-subtitle">Facilities in selection</div>
+      </div>
+
+      <div class="kpi">
+        <div class="kpi-label">Average Spaces</div>
+        <div class="kpi-value" id="averageSpaces">—</div>
+        <div class="kpi-subtitle">Spaces per location</div>
+      </div>
+
+      <div class="kpi">
+        <div class="kpi-label">24-Hour Locations</div>
+        <div class="kpi-value" id="twentyFourHour">—</div>
+        <div class="kpi-subtitle">Locations open 24 hours</div>
+      </div>
+
+      <div class="kpi">
+        <div class="kpi-label">Heavy-Duty EV</div>
+        <div class="kpi-value" id="heavyDutyEV">—</div>
+        <div class="kpi-subtitle">Locations with HD EV charging</div>
+      </div>
+
+    </section>
+
+
+    <!-- ==============================
+         MAP + CHARTS
+    =============================== -->
+    <section class="content-grid">
+
+      <!-- MAP -->
+      <div class="panel">
+
+        <div class="panel-header">
+          <h2>Truck Parking Locations</h2>
+          <span>Texas extent</span>
+        </div>
+
+        <div id="map"></div>
+
+      </div>
+
+
+      <!-- CHARTS -->
+      <div class="charts">
+
+        <div class="panel">
+
+          <div class="panel-header">
+            <h2>Parking Spaces by District</h2>
+            <span>Filtered results</span>
+          </div>
+
+          <div class="chart-container">
+            <canvas id="districtChart"></canvas>
+          </div>
+
+        </div>
+
+
+        <div class="panel">
+
+          <div class="panel-header">
+            <h2>Parking Locations by County</h2>
+            <span>Filtered results</span>
+          </div>
+
+          <div class="chart-container">
+            <canvas id="countyChart"></canvas>
+          </div>
+
+        </div>
+
+
+        <div class="panel">
+
+          <div class="panel-header">
+            <h2>Ownership</h2>
+            <span>Filtered results</span>
+          </div>
+
+          <div class="chart-container">
+            <canvas id="ownershipChart"></canvas>
+          </div>
+
+        </div>
+
+
+        <div class="panel">
+
+          <div class="panel-header">
+            <h2>Truck Services</h2>
+            <span>Filtered results</span>
+          </div>
+
+          <div class="chart-container">
+            <canvas id="servicesChart"></canvas>
+          </div>
+
+        </div>
+
+      </div>
+
+    </section>
+
+
+    <!-- STATUS -->
+    <div class="status">
+      <span id="statusDot" class="status-dot loading"></span>
+      <span id="statusText">Loading ArcGIS data...</span>
     </div>
 
+  </main>
+
+
+  <!-- ==============================
+       LOADING OVERLAY
+  =============================== -->
+
+  <div id="loadingOverlay" class="loading-overlay">
+    <div class="loading-box">
+      <div class="spinner"></div>
+      <strong>Loading truck parking inventory...</strong>
+    </div>
   </div>
 
-  <!-- CHARTS -->
-  <div class="charts-grid">
 
-    <div class="panel">
-      <h2>Locations by County</h2>
-      <div class="chart-container">
-        <canvas id="countyChart"></canvas>
-      </div>
-    </div>
+  <!-- ==============================
+       JAVASCRIPT LIBRARIES
+  =============================== -->
 
-    <div class="panel">
-      <h2>Parking Inventory by County</h2>
-      <div class="chart-container">
-        <canvas id="parkingChart"></canvas>
-      </div>
-    </div>
+  <script
+    src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
+    integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo="
+    crossorigin=""
+  ></script>
 
-    <div class="panel">
-      <h2>Ownership Distribution</h2>
-      <div class="chart-container">
-        <canvas id="ownershipChart"></canvas>
-      </div>
-    </div>
-
-    <div class="panel">
-      <h2>EV Charging</h2>
-      <div class="chart-container">
-        <canvas id="evChart"></canvas>
-      </div>
-    </div>
-
-    <div class="panel">
-      <h2>24-Hour Availability</h2>
-      <div class="chart-container">
-        <canvas id="open24Chart"></canvas>
-      </div>
-    </div>
-
-    <div class="panel">
-      <h2>Repair Facilities</h2>
-      <div class="chart-container">
-        <canvas id="repairChart"></canvas>
-      </div>
-    </div>
-
-  </div>
-
-</div>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.7/dist/chart.umd.min.js"></script>
 
 
-<script type="module">
+  <!-- ==============================
+       APPLICATION
+  =============================== -->
 
-/* ============================================================
-   ============================================================
-   AGO SERVICE URL
-   ============================================================
-   THIS IS THE ONLY PLACE YOU NEED TO CHANGE THE SERVICE.
-   ============================================================ */
+  <script>
 
-const AGO_SERVICE_URL =
-  "https://services.arcgis.com/KTcxiTD9dsQw4r7Z/arcgis/rest/services/Truck_Parking_Inventory/FeatureServer/2";
+    /*
+     * ==========================================================
+     * CONFIGURATION
+     * ==========================================================
+     */
 
+    const FEATURE_SERVICE =
+      "https://services.arcgis.com/KTcxiTD9dsQw4r7Z/arcgis/rest/services/Truck_Parking_Inventory/FeatureServer/2";
 
-/* ============================================================
-   GLOBALS
-============================================================ */
+    const QUERY_URL = `${FEATURE_SERVICE}/query`;
 
-let Map;
-let MapView;
-let FeatureLayer;
+    const TEXAS_EXTENT = [
+      [25.84, -106.65],
+      [36.50, -93.50]
+    ];
 
-let map;
-let view;
-let featureLayer;
-
-let allFeatures = [];
-let filteredFeatures = [];
-
-let charts = {};
-
-
-/* ============================================================
-   EXPECTED DATA FIELDS
-============================================================ */
-
-const FIELDS = {
-  county: "CNTY_NM",
-  district: "DIST_NM",
-  city: "CITY_NM",
-  parking: "Parking_Inventory",
-  ownership: "OWNERSHIP",
-  open24: "OPENTWNTYFOURHOUR",
-  repair: "REPAIRFACILITIES",
-  heavyEV: "HEAVYDUTY_EVCHARGE",
-  lightEV: "LIGHTDUTY_EVCHARGE",
-  area: "SQFT_AREA"
-};
+    const COLORS = {
+      navy: "#123B5D",
+      orange: "#C65D1E",
+      black: "#111111",
+      white: "#FFFFFF",
+      red: "#8B2E2E",
+      grey: "#6B7280",
+      lightGrey: "#D9DEE3"
+    };
 
 
-/* ============================================================
-   START APPLICATION
-============================================================ */
+    /*
+     * ==========================================================
+     * GLOBAL VARIABLES
+     * ==========================================================
+     */
 
-async function startDashboard() {
+    let allFeatures = [];
+    let filteredFeatures = [];
 
-  try {
+    let map;
+    let markerLayer;
 
-    setStatus(
-      "loading",
-      "Loading ArcGIS Maps SDK..."
-    );
-
-
-    /* ========================================================
-       NEW ARC GIS MODULE LOADER
-       NO "require()" IS USED ANYWHERE.
-    ======================================================== */
-
-    [
-      Map,
-      MapView,
-      FeatureLayer
-
-    ] = await $arcgis.import([
-
-      "@arcgis/core/Map.js",
-
-      "@arcgis/core/views/MapView.js",
-
-      "@arcgis/core/layers/FeatureLayer.js"
-
-    ]);
+    let districtChart;
+    let countyChart;
+    let ownershipChart;
+    let servicesChart;
 
 
-    setStatus(
-      "loading",
-      "Connecting to ArcGIS Online..."
-    );
+    /*
+     * ==========================================================
+     * INITIALIZE MAP
+     * ==========================================================
+     */
+
+    function initializeMap() {
+
+      map = L.map("map", {
+        zoomControl: true
+      });
+
+      /*
+       * OpenStreetMap base layer
+       */
+
+      L.tileLayer(
+        "https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png",
+        {
+          attribution:
+            '&copy; OpenStreetMap contributors'
+        }
+      ).addTo(map);
+
+      /*
+       * Automatically zoom to Texas.
+       */
+
+      map.fitBounds(TEXAS_EXTENT);
+
+      markerLayer = L.layerGroup().addTo(map);
+    }
 
 
-    /* ========================================================
-       CREATE FEATURE LAYER
-    ======================================================== */
+    /*
+     * ==========================================================
+     * GET ALL FEATURES
+     * ==========================================================
+     */
 
-    featureLayer =
-      new FeatureLayer({
+    async function loadFeatures() {
 
-        url: AGO_SERVICE_URL,
+      setStatus(
+        "loading",
+        "Loading truck parking inventory..."
+      );
 
-        outFields: ["*"],
+      try {
 
-        popupTemplate: {
+        /*
+         * The ArcGIS REST API can limit the number of
+         * records returned in a single request.
+         *
+         * We therefore request records in batches.
+         */
 
-          title:
-            "{CITY_NM}",
+        let offset = 0;
+        const batchSize = 2000;
 
-          content: [
+        while (true) {
 
-            {
-              type: "fields",
+          const params = new URLSearchParams({
+            where: "1=1",
+            outFields: "*",
+            returnGeometry: "true",
+            outSR: "4326",
+            resultOffset: offset,
+            resultRecordCount: batchSize,
+            f: "json"
+          });
 
-              fieldInfos: [
+          const response = await fetch(
+            `${QUERY_URL}?${params.toString()}`
+          );
 
-                {
-                  fieldName: "CNTY_NM",
-                  label: "County"
-                },
+          if (!response.ok) {
+            throw new Error(
+              `ArcGIS request failed: ${response.status}`
+            );
+          }
 
-                {
-                  fieldName: "DIST_NM",
-                  label: "District"
-                },
+          const data = await response.json();
 
-                {
-                  fieldName: "CITY_NM",
-                  label: "City"
-                },
+          if (data.error) {
+            throw new Error(
+              data.error.message || "ArcGIS API error"
+            );
+          }
 
-                {
-                  fieldName: "Parking_Inventory",
-                  label: "Parking Inventory"
-                },
+          const features = data.features || [];
 
-                {
-                  fieldName: "OWNERSHIP",
-                  label: "Ownership"
-                },
+          allFeatures.push(...features);
 
-                {
-                  fieldName: "OPENTWNTYFOURHOUR",
-                  label: "Open 24 Hours"
-                },
+          /*
+           * If fewer than the requested batch size came back,
+           * we've reached the end.
+           */
 
-                {
-                  fieldName: "REPAIRFACILITIES",
-                  label: "Repair Facilities"
-                },
+          if (features.length < batchSize) {
+            break;
+          }
 
-                {
-                  fieldName: "HEAVYDUTY_EVCHARGE",
-                  label: "Heavy Duty EV Charging"
-                },
+          offset += batchSize;
+        }
 
-                {
-                  fieldName: "LIGHTDUTY_EVCHARGE",
-                  label: "Light Duty EV Charging"
-                },
+        filteredFeatures = [...allFeatures];
 
-                {
-                  fieldName: "SQFT_AREA",
-                  label: "Area (Sq Ft)"
-                }
+        setStatus(
+          "success",
+          `${allFeatures.length.toLocaleString()} parking locations loaded`
+        );
 
-              ]
-            }
+        populateFilters();
 
-          ]
+        updateDashboard();
 
+        document
+          .getElementById("loadingOverlay")
+          .classList.add("hidden");
+
+      } catch (error) {
+
+        console.error(error);
+
+        setStatus(
+          "error",
+          `Unable to load ArcGIS data: ${error.message}`
+        );
+
+        document
+          .getElementById("loadingOverlay")
+          .classList.add("hidden");
+
+        alert(
+          "There was a problem loading the ArcGIS FeatureServer. " +
+          "Check the browser console for details."
+        );
+      }
+    }
+
+
+    /*
+     * ==========================================================
+     * UNIQUE VALUES
+     * ==========================================================
+     */
+
+    function uniqueValues(field, features = allFeatures) {
+
+      const values = new Set();
+
+      features.forEach(feature => {
+
+        const value = feature.attributes[field];
+
+        if (
+          value !== null &&
+          value !== undefined &&
+          String(value).trim() !== ""
+        ) {
+          values.add(String(value).trim());
         }
 
       });
 
-
-    /* ========================================================
-       LOAD SERVICE
-    ======================================================== */
-
-    await featureLayer.load();
-
-
-    console.log(
-      "Feature service loaded:",
-      featureLayer
-    );
-
-
-    console.log(
-      "Feature service fields:",
-      featureLayer.fields.map(
-        f => f.name
-      )
-    );
-
-
-    /* ========================================================
-       CREATE MAP
-    ======================================================== */
-
-    map =
-      new Map({
-
-        basemap:
-          "gray-vector",
-
-        layers:
-          [featureLayer]
-
-      });
-
-
-    /* ========================================================
-       CREATE MAP VIEW
-    ======================================================== */
-
-    view =
-      new MapView({
-
-        container:
-          "viewDiv",
-
-        map:
-          map,
-
-        center:
-          [-98, 38],
-
-        zoom:
-          4
-
-      });
-
-
-    await view.when();
-
-
-    /* ========================================================
-       LOAD FEATURES
-    ======================================================== */
-
-    setStatus(
-      "loading",
-      "Connected. Loading GIS records..."
-    );
-
-
-    await loadFeatures();
-
-
-    /* ========================================================
-       INITIAL DASHBOARD
-    ======================================================== */
-
-    filteredFeatures =
-      [...allFeatures];
-
-
-    document.getElementById(
-      "recordCount"
-    ).textContent =
-      allFeatures.length.toLocaleString();
-
-
-    populateFilters();
-
-    updateDashboard();
-
-
-    /* ========================================================
-       ZOOM TO SERVICE
-    ======================================================== */
-
-    if (featureLayer.fullExtent) {
-
-      await view.goTo(
-        featureLayer.fullExtent.expand(1.1)
+      return [...values].sort(
+        (a, b) =>
+          a.localeCompare(b, undefined, {
+            numeric: true,
+            sensitivity: "base"
+          })
       );
-
     }
 
 
-    /* ========================================================
-       CLICK MAP FEATURE
-    ======================================================== */
+    /*
+     * ==========================================================
+     * POPULATE FILTERS
+     * ==========================================================
+     */
 
-    view.on(
-      "click",
-      async event => {
+    function populateFilters() {
 
-        const response =
-          await view.hitTest(event);
+      populateSelect(
+        document.getElementById("districtFilter"),
+        uniqueValues("DIST_NM"),
+        "All Districts"
+      );
+
+      populateSelect(
+        document.getElementById("countyFilter"),
+        uniqueValues("CNTY_NM"),
+        "All Counties"
+      );
+
+      populateSelect(
+        document.getElementById("cityFilter"),
+        uniqueValues("CITY_NM"),
+        "All Cities"
+      );
+    }
 
 
-        const result =
-          response.results.find(
-            item =>
-              item.graphic &&
-              item.graphic.layer ===
-              featureLayer
+    function populateSelect(select, values, allLabel) {
+
+      select.innerHTML = "";
+
+      const allOption = document.createElement("option");
+
+      allOption.value = "";
+      allOption.textContent = allLabel;
+
+      select.appendChild(allOption);
+
+      values.forEach(value => {
+
+        const option = document.createElement("option");
+
+        option.value = value;
+        option.textContent = value;
+
+        select.appendChild(option);
+      });
+    }
+
+
+    /*
+     * ==========================================================
+     * FILTER DATA
+     * ==========================================================
+     */
+
+    function applyFilters() {
+
+      const district =
+        document.getElementById("districtFilter").value;
+
+      const county =
+        document.getElementById("countyFilter").value;
+
+      const city =
+        document.getElementById("cityFilter").value;
+
+
+      filteredFeatures = allFeatures.filter(feature => {
+
+        const attrs = feature.attributes;
+
+        const districtMatch =
+          !district ||
+          String(attrs.DIST_NM || "").trim() === district;
+
+        const countyMatch =
+          !county ||
+          String(attrs.CNTY_NM || "").trim() === county;
+
+        const cityMatch =
+          !city ||
+          String(attrs.CITY_NM || "").trim() === city;
+
+        return (
+          districtMatch &&
+          countyMatch &&
+          cityMatch
+        );
+      });
+
+
+      /*
+       * Recalculate everything.
+       */
+
+      updateDashboard();
+    }
+
+
+    /*
+     * ==========================================================
+     * UPDATE DASHBOARD
+     * ==========================================================
+     */
+
+    function updateDashboard() {
+
+      updateKPIs();
+
+      updateMap();
+
+      updateCharts();
+    }
+
+
+    /*
+     * ==========================================================
+     * KPI CALCULATIONS
+     * ==========================================================
+     */
+
+    function updateKPIs() {
+
+      const features = filteredFeatures;
+
+      const locations = features.length;
+
+
+      /*
+       * Total parking inventory
+       */
+
+      const totalSpaces = features.reduce(
+        (sum, feature) => {
+
+          const value =
+            Number(feature.attributes.Parking_Inventory);
+
+          return sum + (
+            Number.isFinite(value)
+              ? value
+              : 0
           );
 
+        },
+        0
+      );
 
-        if (!result) {
+
+      /*
+       * Average parking spaces.
+       */
+
+      const averageSpaces =
+        locations > 0
+          ? totalSpaces / locations
+          : 0;
+
+
+      /*
+       * 24-hour locations.
+       *
+       * This intentionally looks for common affirmative
+       * values instead of assuming one exact capitalization.
+       */
+
+      const twentyFourHour = features.filter(
+        feature =>
+          isYes(
+            feature.attributes.OPENTWNTYFOURHOUR
+          )
+      ).length;
+
+
+      /*
+       * Heavy-duty EV charging locations.
+       */
+
+      const heavyDutyEV = features.filter(
+        feature =>
+          isYes(
+            feature.attributes.HEAVYDUTY_EVCHARGE
+          )
+      ).length;
+
+
+      document.getElementById(
+        "totalSpaces"
+      ).textContent =
+        totalSpaces.toLocaleString();
+
+
+      document.getElementById(
+        "totalLocations"
+      ).textContent =
+        locations.toLocaleString();
+
+
+      document.getElementById(
+        "averageSpaces"
+      ).textContent =
+        averageSpaces.toLocaleString(
+          undefined,
+          {
+            maximumFractionDigits: 1
+          }
+        );
+
+
+      document.getElementById(
+        "twentyFourHour"
+      ).textContent =
+        twentyFourHour.toLocaleString();
+
+
+      document.getElementById(
+        "heavyDutyEV"
+      ).textContent =
+        heavyDutyEV.toLocaleString();
+    }
+
+
+    /*
+     * ==========================================================
+     * YES / NO HELPER
+     * ==========================================================
+     */
+
+    function isYes(value) {
+
+      if (
+        value === null ||
+        value === undefined
+      ) {
+        return false;
+      }
+
+      const normalized =
+        String(value)
+          .trim()
+          .toLowerCase();
+
+      return [
+        "yes",
+        "y",
+        "true",
+        "1",
+        "available",
+        "open"
+      ].includes(normalized);
+    }
+
+
+    /*
+     * ==========================================================
+     * MAP
+     * ==========================================================
+     */
+
+    function updateMap() {
+
+      markerLayer.clearLayers();
+
+      /*
+       * Keep the map focused on Texas.
+       *
+       * When a filter is selected, zoom to the matching
+       * features if they have geometry.
+       */
+
+      const bounds = [];
+
+      filteredFeatures.forEach(feature => {
+
+        const geometry = feature.geometry;
+
+        if (
+          !geometry ||
+          geometry.x === undefined ||
+          geometry.y === undefined
+        ) {
           return;
         }
 
+        const lat = geometry.y;
+        const lng = geometry.x;
 
-        updateSelectedFeature(
-          result.graphic.attributes
+        const attrs = feature.attributes;
+
+        const marker = L.circleMarker(
+          [lat, lng],
+          {
+            radius: 7,
+            fillColor: COLORS.orange,
+            color: COLORS.navy,
+            weight: 2,
+            opacity: 1,
+            fillOpacity: 0.85
+          }
         );
 
-      }
-    );
 
+        const popup = `
+          <div class="popup-title">
+            Truck Parking Location
+          </div>
 
-    setStatus(
-      "success",
-      "Connected — " +
-      allFeatures.length.toLocaleString() +
-      " features loaded"
-    );
+          <div class="popup-row">
+            <span class="popup-label">City</span>
+            <span class="popup-value">
+              ${escapeHtml(attrs.CITY_NM || "—")}
+            </span>
+          </div>
 
-  }
+          <div class="popup-row">
+            <span class="popup-label">County</span>
+            <span class="popup-value">
+              ${escapeHtml(attrs.CNTY_NM || "—")}
+            </span>
+          </div>
 
-  catch (error) {
+          <div class="popup-row">
+            <span class="popup-label">District</span>
+            <span class="popup-value">
+              ${escapeHtml(attrs.DIST_NM || "—")}
+            </span>
+          </div>
 
-    console.error(
-      "DASHBOARD ERROR:",
-      error
-    );
+          <div class="popup-row">
+            <span class="popup-label">Parking Spaces</span>
+            <span class="popup-value">
+              ${formatNumber(attrs.Parking_Inventory)}
+            </span>
+          </div>
 
-    showError(error);
+          <div class="popup-row">
+            <span class="popup-label">Ownership</span>
+            <span class="popup-value">
+              ${escapeHtml(attrs.OWNERSHIP || "—")}
+            </span>
+          </div>
 
-  }
+          <div class="popup-row">
+            <span class="popup-label">Nearest IH</span>
+            <span class="popup-value">
+              ${escapeHtml(attrs.NEAREST_IH || "—")}
+            </span>
+          </div>
+        `;
 
-}
+        marker.bindPopup(popup);
 
+        marker.addTo(markerLayer);
 
-/* ============================================================
-   LOAD ALL FEATURES
-============================================================ */
-
-async function loadFeatures() {
-
-  allFeatures = [];
-
-  let offset = 0;
-
-  const pageSize = 1000;
-
-
-  while (true) {
-
-    console.log(
-      "Querying records from offset:",
-      offset
-    );
-
-
-    const result =
-      await featureLayer.queryFeatures({
-
-        where:
-          "1=1",
-
-        outFields:
-          ["*"],
-
-        returnGeometry:
-          true,
-
-        resultOffset:
-          offset,
-
-        resultRecordCount:
-          pageSize
-
+        bounds.push([lat, lng]);
       });
 
 
-    if (
-      !result ||
-      !result.features
-    ) {
+      /*
+       * Auto zoom behavior.
+       */
 
-      throw new Error(
-        "ArcGIS returned an invalid FeatureSet."
-      );
+      if (bounds.length > 0) {
 
-    }
+        if (bounds.length === 1) {
 
-
-    allFeatures.push(
-      ...result.features
-    );
-
-
-    console.log(
-      "Records loaded:",
-      allFeatures.length
-    );
-
-
-    if (
-      !result.exceededTransferLimit ||
-      result.features.length === 0
-    ) {
-
-      break;
-
-    }
-
-
-    offset +=
-      result.features.length;
-
-  }
-
-
-  console.log(
-    "TOTAL FEATURES:",
-    allFeatures.length
-  );
-
-}
-
-
-/* ============================================================
-   FILTERS
-============================================================ */
-
-function populateFilters() {
-
-  populateSelect(
-    "countyFilter",
-    FIELDS.county,
-    "All Counties"
-  );
-
-  populateSelect(
-    "districtFilter",
-    FIELDS.district,
-    "All Districts"
-  );
-
-  populateSelect(
-    "cityFilter",
-    FIELDS.city,
-    "All Cities"
-  );
-
-  populateSelect(
-    "ownershipFilter",
-    FIELDS.ownership,
-    "All Ownership Types"
-  );
-
-}
-
-
-function populateSelect(
-  id,
-  field,
-  defaultText
-) {
-
-  const select =
-    document.getElementById(id);
-
-  select.innerHTML = "";
-
-
-  const first =
-    document.createElement("option");
-
-  first.value = "";
-
-  first.textContent =
-    defaultText;
-
-  select.appendChild(first);
-
-
-  const values =
-    new Set();
-
-
-  allFeatures.forEach(
-    feature => {
-
-      const value =
-        feature.attributes[field];
-
-
-      if (
-        value !== null &&
-        value !== undefined &&
-        String(value).trim() !== ""
-      ) {
-
-        values.add(
-          String(value).trim()
-        );
-
-      }
-
-    }
-  );
-
-
-  [...values]
-    .sort(
-      (a,b) =>
-        a.localeCompare(b)
-    )
-    .forEach(
-      value => {
-
-        const option =
-          document.createElement(
-            "option"
+          map.setView(
+            bounds[0],
+            12
           );
 
-        option.value = value;
+        } else {
 
-        option.textContent = value;
+          map.fitBounds(
+            bounds,
+            {
+              padding: [30, 30],
+              maxZoom: 12
+            }
+          );
+        }
 
-        select.appendChild(
-          option
+      } else {
+
+        map.fitBounds(TEXAS_EXTENT);
+      }
+    }
+
+
+    /*
+     * ==========================================================
+     * CHARTS
+     * ==========================================================
+     */
+
+    function updateCharts() {
+
+      updateDistrictChart();
+
+      updateCountyChart();
+
+      updateOwnershipChart();
+
+      updateServicesChart();
+    }
+
+
+    /*
+     * ----------------------------------------------------------
+     * DISTRICT CHART
+     * ----------------------------------------------------------
+     */
+
+    function updateDistrictChart() {
+
+      const grouped = groupSum(
+        filteredFeatures,
+        "DIST_NM",
+        "Parking_Inventory"
+      );
+
+      const labels =
+        Object.keys(grouped);
+
+      const values =
+        Object.values(grouped);
+
+
+      if (districtChart) {
+        districtChart.destroy();
+      }
+
+
+      districtChart =
+        new Chart(
+          document.getElementById("districtChart"),
+          {
+            type: "bar",
+
+            data: {
+              labels,
+              datasets: [
+                {
+                  label: "Parking Spaces",
+                  data: values,
+                  backgroundColor: COLORS.navy,
+                  borderColor: COLORS.navy,
+                  borderWidth: 1
+                }
+              ]
+            },
+
+            options: chartOptions(
+              "Parking Spaces"
+            )
+          }
+        );
+    }
+
+
+    /*
+     * ----------------------------------------------------------
+     * COUNTY CHART
+     * ----------------------------------------------------------
+     */
+
+    function updateCountyChart() {
+
+      const grouped = groupCount(
+        filteredFeatures,
+        "CNTY_NM"
+      );
+
+
+      /*
+       * Limit the chart to the 20 largest counties
+       * so the visualization remains readable.
+       */
+
+      const sorted =
+        Object.entries(grouped)
+          .sort((a, b) => b[1] - a[1])
+          .slice(0, 20);
+
+
+      const labels =
+        sorted.map(item => item[0]);
+
+      const values =
+        sorted.map(item => item[1]);
+
+
+      if (countyChart) {
+        countyChart.destroy();
+      }
+
+
+      countyChart =
+        new Chart(
+          document.getElementById("countyChart"),
+          {
+            type: "bar",
+
+            data: {
+              labels,
+              datasets: [
+                {
+                  label: "Parking Locations",
+                  data: values,
+                  backgroundColor: COLORS.orange,
+                  borderColor: COLORS.orange,
+                  borderWidth: 1
+                }
+              ]
+            },
+
+            options: {
+              ...chartOptions(
+                "Parking Locations"
+              ),
+
+              indexAxis: "y"
+            }
+          }
+        );
+    }
+
+
+    /*
+     * ----------------------------------------------------------
+     * OWNERSHIP CHART
+     * ----------------------------------------------------------
+     */
+
+    function updateOwnershipChart() {
+
+      const grouped =
+        groupCount(
+          filteredFeatures,
+          "OWNERSHIP"
         );
 
+
+      const entries =
+        Object.entries(grouped)
+          .sort((a, b) => b[1] - a[1]);
+
+
+      const labels =
+        entries.map(item => item[0]);
+
+      const values =
+        entries.map(item => item[1]);
+
+
+      if (ownershipChart) {
+        ownershipChart.destroy();
       }
-    );
-
-}
 
 
-/* ============================================================
-   FILTER EVENT LISTENERS
-============================================================ */
+      ownershipChart =
+        new Chart(
+          document.getElementById("ownershipChart"),
+          {
+            type: "doughnut",
 
-[
-  "countyFilter",
-  "districtFilter",
-  "cityFilter",
-  "ownershipFilter"
+            data: {
+              labels,
+              datasets: [
+                {
+                  data: values,
 
-].forEach(id => {
+                  backgroundColor: [
+                    COLORS.navy,
+                    COLORS.orange,
+                    COLORS.red,
+                    COLORS.grey,
+                    COLORS.black,
+                    "#A7AFB7",
+                    "#D27B48",
+                    "#315D7D"
+                  ],
 
-  document
-    .getElementById(id)
-    .addEventListener(
-      "change",
-      applyFilters
-    );
+                  borderColor: COLORS.white,
+                  borderWidth: 2
+                }
+              ]
+            },
 
-});
+            options: {
+              responsive: true,
+              maintainAspectRatio: false,
 
-
-/* ============================================================
-   APPLY FILTERS
-============================================================ */
-
-function applyFilters() {
-
-  const county =
-    getValue("countyFilter");
-
-  const district =
-    getValue("districtFilter");
-
-  const city =
-    getValue("cityFilter");
-
-  const ownership =
-    getValue("ownershipFilter");
-
-
-  filteredFeatures =
-    allFeatures.filter(
-      feature => {
-
-        const a =
-          feature.attributes;
+              plugins: {
+                legend: {
+                  position: "right"
+                }
+              }
+            }
+          }
+        );
+    }
 
 
-        return (
+    /*
+     * ----------------------------------------------------------
+     * SERVICES CHART
+     * ----------------------------------------------------------
+     */
 
-          (!county ||
-            clean(a[FIELDS.county]) === county)
+    function updateServicesChart() {
 
-          &&
+      const services = [
+        {
+          field: "OPENTWNTYFOURHOUR",
+          label: "24-Hour"
+        },
+        {
+          field: "REPAIRFACILITIES",
+          label: "Repair Facilities"
+        },
+        {
+          field: "HEAVYDUTYLIQUIDFUEL",
+          label: "Heavy-Duty Fuel"
+        },
+        {
+          field: "LIGHTYDUTYLIQUIDFUEL",
+          label: "Light-Duty Fuel"
+        },
+        {
+          field: "HEAVYDUTY_EVCHARGE",
+          label: "Heavy-Duty EV"
+        },
+        {
+          field: "LIGHTDUTY_EVCHARGE",
+          label: "Light-Duty EV"
+        }
+      ];
 
-          (!district ||
-            clean(a[FIELDS.district]) === district)
 
-          &&
-
-          (!city ||
-            clean(a[FIELDS.city]) === city)
-
-          &&
-
-          (!ownership ||
-            clean(a[FIELDS.ownership]) === ownership)
-
+      const values =
+        services.map(
+          service =>
+            filteredFeatures.filter(
+              feature =>
+                isYes(
+                  feature.attributes[
+                    service.field
+                  ]
+                )
+            ).length
         );
 
+
+      const labels =
+        services.map(
+          service => service.label
+        );
+
+
+      if (servicesChart) {
+        servicesChart.destroy();
       }
-    );
 
 
-  /* Update map filtering */
+      servicesChart =
+        new Chart(
+          document.getElementById("servicesChart"),
+          {
+            type: "bar",
 
-  featureLayer.definitionExpression =
-    buildDefinitionExpression();
+            data: {
+              labels,
+
+              datasets: [
+                {
+                  label: "Locations",
+                  data: values,
+                  backgroundColor: [
+                    COLORS.navy,
+                    COLORS.orange,
+                    COLORS.red,
+                    COLORS.grey,
+                    COLORS.black,
+                    "#315D7D"
+                  ]
+                }
+              ]
+            },
+
+            options: chartOptions(
+              "Locations"
+            )
+          }
+        );
+    }
 
 
-  updateDashboard();
+    /*
+     * ==========================================================
+     * GROUPING HELPERS
+     * ==========================================================
+     */
 
-}
+    function groupCount(
+      features,
+      field
+    ) {
+
+      const result = {};
+
+      features.forEach(feature => {
+
+        let value =
+          feature.attributes[field];
+
+        if (
+          value === null ||
+          value === undefined ||
+          String(value).trim() === ""
+        ) {
+          value = "Unknown";
+        }
+
+        value = String(value).trim();
+
+        result[value] =
+          (result[value] || 0) + 1;
+      });
+
+      return result;
+    }
 
 
-/* ============================================================
-   RESET
-============================================================ */
+    function groupSum(
+      features,
+      groupField,
+      sumField
+    ) {
 
-document
-  .getElementById("resetButton")
-  .addEventListener(
-    "click",
-    () => {
+      const result = {};
 
-      [
-        "countyFilter",
-        "districtFilter",
-        "cityFilter",
-        "ownershipFilter"
+      features.forEach(feature => {
 
-      ].forEach(id => {
+        let group =
+          feature.attributes[groupField];
 
-        document.getElementById(id).value = "";
+        if (
+          group === null ||
+          group === undefined ||
+          String(group).trim() === ""
+        ) {
+          group = "Unknown";
+        }
 
+        group =
+          String(group).trim();
+
+
+        const value =
+          Number(
+            feature.attributes[sumField]
+          );
+
+
+        result[group] =
+          (result[group] || 0) +
+          (
+            Number.isFinite(value)
+              ? value
+              : 0
+          );
       });
 
 
-      featureLayer.definitionExpression =
-        "1=1";
+      /*
+       * Sort largest first.
+       */
 
-
-      filteredFeatures =
-        [...allFeatures];
-
-
-      updateDashboard();
-
+      return Object.fromEntries(
+        Object.entries(result)
+          .sort(
+            (a, b) => b[1] - a[1]
+          )
+      );
     }
-  );
 
 
-/* ============================================================
-   DEFINITION EXPRESSION
-============================================================ */
+    /*
+     * ==========================================================
+     * CHART OPTIONS
+     * ==========================================================
+     */
 
-function buildDefinitionExpression() {
+    function chartOptions(
+      yAxisTitle
+    ) {
 
-  const conditions = [];
+      return {
+        responsive: true,
+        maintainAspectRatio: false,
 
-
-  const filters = [
-
-    [
-      "countyFilter",
-      FIELDS.county
-    ],
-
-    [
-      "districtFilter",
-      FIELDS.district
-    ],
-
-    [
-      "cityFilter",
-      FIELDS.city
-    ],
-
-    [
-      "ownershipFilter",
-      FIELDS.ownership
-    ]
-
-  ];
-
-
-  filters.forEach(
-    ([elementId, field]) => {
-
-      const value =
-        getValue(elementId);
-
-
-      if (value) {
-
-        conditions.push(
-          `${field} = '${sqlEscape(value)}'`
-        );
-
-      }
-
-    }
-  );
-
-
-  return conditions.length
-    ? conditions.join(" AND ")
-    : "1=1";
-
-}
-
-
-function sqlEscape(value) {
-
-  return String(value)
-    .replace(/'/g, "''");
-
-}
-
-
-/* ============================================================
-   UPDATE EVERYTHING
-============================================================ */
-
-function updateDashboard() {
-
-  updateKPIs();
-
-  updateSummary();
-
-  updateCharts();
-
-  updateCurrentFilter();
-
-}
-
-
-/* ============================================================
-   KPI
-============================================================ */
-
-function updateKPIs() {
-
-  const locations =
-    filteredFeatures.length;
-
-
-  const parking =
-    sum(FIELDS.parking);
-
-
-  const area =
-    sum(FIELDS.area);
-
-
-  const open24 =
-    filteredFeatures.filter(
-      feature =>
-        isYes(
-          feature.attributes[
-            FIELDS.open24
-          ]
-        )
-    ).length;
-
-
-  const ev =
-    filteredFeatures.filter(
-      feature =>
-
-        isYes(
-          feature.attributes[
-            FIELDS.heavyEV
-          ]
-        )
-
-        ||
-
-        isYes(
-          feature.attributes[
-            FIELDS.lightEV
-          ]
-        )
-
-    ).length;
-
-
-  setText(
-    "totalLocations",
-    format(locations)
-  );
-
-  setText(
-    "totalParking",
-    format(parking)
-  );
-
-  setText(
-    "totalArea",
-    format(Math.round(area))
-  );
-
-  setText(
-    "open24",
-    format(open24)
-  );
-
-  setText(
-    "evLocations",
-    format(ev)
-  );
-
-}
-
-
-/* ============================================================
-   SUMMARY
-============================================================ */
-
-function updateSummary() {
-
-  setText(
-    "summaryLocations",
-    format(filteredFeatures.length)
-  );
-
-
-  setText(
-    "summaryParking",
-    format(
-      sum(FIELDS.parking)
-    )
-  );
-
-
-  setText(
-    "summaryArea",
-    format(
-      Math.round(
-        sum(FIELDS.area)
-      )
-    ) + " sq ft"
-  );
-
-
-  const ev =
-    filteredFeatures.filter(
-      feature =>
-
-        isYes(
-          feature.attributes[
-            FIELDS.heavyEV
-          ]
-        )
-
-        ||
-
-        isYes(
-          feature.attributes[
-            FIELDS.lightEV
-          ]
-        )
-
-    ).length;
-
-
-  const repair =
-    filteredFeatures.filter(
-      feature =>
-        isYes(
-          feature.attributes[
-            FIELDS.repair
-          ]
-        )
-    ).length;
-
-
-  setText(
-    "summaryEV",
-    format(ev)
-  );
-
-
-  setText(
-    "summaryRepair",
-    format(repair)
-  );
-
-}
-
-
-/* ============================================================
-   CHARTS
-============================================================ */
-
-function updateCharts() {
-
-  createBarChart(
-    "countyChart",
-    groupCount(FIELDS.county),
-    "#187db8"
-  );
-
-
-  createBarChart(
-    "parkingChart",
-    groupSum(FIELDS.county, FIELDS.parking),
-    "#20a36a"
-  );
-
-
-  createDoughnutChart(
-    "ownershipChart",
-    groupCount(FIELDS.ownership)
-  );
-
-
-  createDoughnutChart(
-    "evChart",
-    {
-      "Heavy Duty EV":
-        filteredFeatures.filter(
-          f =>
-            isYes(
-              f.attributes[FIELDS.heavyEV]
-            )
-        ).length,
-
-      "Light Duty EV":
-        filteredFeatures.filter(
-          f =>
-            isYes(
-              f.attributes[FIELDS.lightEV]
-            )
-        ).length,
-
-      "No EV":
-        filteredFeatures.filter(
-          f =>
-            !isYes(
-              f.attributes[FIELDS.heavyEV]
-            )
-            &&
-            !isYes(
-              f.attributes[FIELDS.lightEV]
-            )
-        ).length
-    }
-  );
-
-
-  createDoughnutChart(
-    "open24Chart",
-    {
-      "24 Hours":
-        filteredFeatures.filter(
-          f =>
-            isYes(
-              f.attributes[FIELDS.open24]
-            )
-        ).length,
-
-      "Not 24 Hours":
-        filteredFeatures.filter(
-          f =>
-            !isYes(
-              f.attributes[FIELDS.open24]
-            )
-        ).length
-    }
-  );
-
-
-  createDoughnutChart(
-    "repairChart",
-    {
-      "Repair Facility":
-        filteredFeatures.filter(
-          f =>
-            isYes(
-              f.attributes[FIELDS.repair]
-            )
-        ).length,
-
-      "No Repair Facility":
-        filteredFeatures.filter(
-          f =>
-            !isYes(
-              f.attributes[FIELDS.repair]
-            )
-        ).length
-    }
-  );
-
-}
-
-
-/* ============================================================
-   GROUP COUNT
-============================================================ */
-
-function groupCount(field) {
-
-  const result = {};
-
-
-  filteredFeatures.forEach(
-    feature => {
-
-      const value =
-        clean(
-          feature.attributes[field]
-        ) || "Unknown";
-
-
-      result[value] =
-        (result[value] || 0) + 1;
-
-    }
-  );
-
-
-  return result;
-
-}
-
-
-/* ============================================================
-   GROUP SUM
-============================================================ */
-
-function groupSum(
-  groupField,
-  valueField
-) {
-
-  const result = {};
-
-
-  filteredFeatures.forEach(
-    feature => {
-
-      const group =
-        clean(
-          feature.attributes[groupField]
-        ) || "Unknown";
-
-
-      const value =
-        Number(
-          feature.attributes[valueField]
-        ) || 0;
-
-
-      result[group] =
-        (result[group] || 0) + value;
-
-    }
-  );
-
-
-  return result;
-
-}
-
-
-/* ============================================================
-   BAR CHART
-============================================================ */
-
-function createBarChart(
-  id,
-  object,
-  color
-) {
-
-  destroyChart(id);
-
-
-  const labels =
-    Object.keys(object);
-
-
-  const values =
-    Object.values(object);
-
-
-  charts[id] =
-    new Chart(
-      document.getElementById(id),
-      {
-
-        type: "bar",
-
-        data: {
-
-          labels,
-
-          datasets: [
-
-            {
-              data: values,
-
-              backgroundColor: color,
-
-              borderRadius: 5
-            }
-
-          ]
-
-        },
-
-        options: {
-
-          responsive: true,
-
-          maintainAspectRatio: false,
-
-          plugins: {
-
-            legend: {
-              display: false
-            }
-
+        plugins: {
+          legend: {
+            display: false
           },
 
-          scales: {
-
-            y: {
-              beginAtZero: true
+          tooltip: {
+            callbacks: {
+              label: context =>
+                `${context.dataset.label}: ${formatNumber(context.raw)}`
             }
-
           }
-
-        }
-
-      }
-    );
-
-}
-
-
-/* ============================================================
-   DOUGHNUT CHART
-============================================================ */
-
-function createDoughnutChart(
-  id,
-  object
-) {
-
-  destroyChart(id);
-
-
-  charts[id] =
-    new Chart(
-      document.getElementById(id),
-      {
-
-        type: "doughnut",
-
-        data: {
-
-          labels:
-            Object.keys(object),
-
-          datasets: [
-
-            {
-
-              data:
-                Object.values(object),
-
-              backgroundColor: [
-
-                "#187db8",
-                "#20a36a",
-                "#f39c12",
-                "#9b59b6",
-                "#e74c3c",
-                "#34495e",
-                "#16a085"
-
-              ]
-
-            }
-
-          ]
-
         },
 
-        options: {
+        scales: {
+          x: {
+            grid: {
+              display: false
+            },
 
-          responsive: true,
-
-          maintainAspectRatio: false,
-
-          plugins: {
-
-            legend: {
-
-              display: true,
-
-              position: "bottom"
-
+            ticks: {
+              color: COLORS.grey
             }
+          },
 
+          y: {
+            beginAtZero: true,
+
+            title: {
+              display: true,
+              text: yAxisTitle,
+              color: COLORS.grey
+            },
+
+            ticks: {
+              color: COLORS.grey
+            }
           }
-
         }
-
-      }
-    );
-
-}
+      };
+    }
 
 
-/* ============================================================
-   DESTROY CHART
-============================================================ */
+    /*
+     * ==========================================================
+     * EVENT HANDLERS
+     * ==========================================================
+     */
 
-function destroyChart(id) {
-
-  if (charts[id]) {
-
-    charts[id].destroy();
-
-    delete charts[id];
-
-  }
-
-}
+    document
+      .getElementById("districtFilter")
+      .addEventListener(
+        "change",
+        applyFilters
+      );
 
 
-/* ============================================================
-   MAP SELECTION
-============================================================ */
-
-function updateSelectedFeature(
-  attributes
-) {
-
-  setText(
-    "summaryLocations",
-    "1 selected"
-  );
+    document
+      .getElementById("countyFilter")
+      .addEventListener(
+        "change",
+        applyFilters
+      );
 
 
-  setText(
-    "summaryParking",
-    format(
-      Number(
-        attributes[FIELDS.parking]
-      ) || 0
-    )
-  );
+    document
+      .getElementById("cityFilter")
+      .addEventListener(
+        "change",
+        applyFilters
+      );
 
 
-  setText(
-    "summaryArea",
-    format(
-      Math.round(
-        Number(
-          attributes[FIELDS.area]
-        ) || 0
-      )
-    ) + " sq ft"
-  );
+    document
+      .getElementById("resetButton")
+      .addEventListener(
+        "click",
+        () => {
+
+          document.getElementById(
+            "districtFilter"
+          ).value = "";
+
+          document.getElementById(
+            "countyFilter"
+          ).value = "";
+
+          document.getElementById(
+            "cityFilter"
+          ).value = "";
+
+          filteredFeatures =
+            [...allFeatures];
+
+          updateDashboard();
+        }
+      );
 
 
-  const ev =
+    /*
+     * ==========================================================
+     * UTILITY FUNCTIONS
+     * ==========================================================
+     */
 
-    isYes(
-      attributes[FIELDS.heavyEV]
-    )
+    function formatNumber(value) {
 
-    ||
+      const number = Number(value);
 
-    isYes(
-      attributes[FIELDS.lightEV]
-    );
-
-
-  setText(
-    "summaryEV",
-    ev ? "Yes" : "No"
-  );
-
-
-  setText(
-    "summaryRepair",
-    isYes(
-      attributes[FIELDS.repair]
-    )
-      ? "Yes"
-      : "No"
-  );
-
-}
-
-
-/* ============================================================
-   CURRENT FILTER
-============================================================ */
-
-function updateCurrentFilter() {
-
-  const parts = [];
-
-
-  const filterDefinitions = [
-
-    ["countyFilter", "County"],
-
-    ["districtFilter", "District"],
-
-    ["cityFilter", "City"],
-
-    ["ownershipFilter", "Ownership"]
-
-  ];
-
-
-  filterDefinitions.forEach(
-    ([id, label]) => {
-
-      const value =
-        getValue(id);
-
-
-      if (value) {
-
-        parts.push(
-          `${label}: ${value}`
-        );
-
+      if (!Number.isFinite(number)) {
+        return "—";
       }
 
+      return number.toLocaleString();
     }
-  );
 
 
-  setText(
-    "currentFilter",
-    parts.length
-      ? parts.join(" | ")
-      : "All Records"
-  );
+    function escapeHtml(value) {
 
-}
+      return String(value)
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;")
+        .replace(/"/g, "&quot;")
+        .replace(/'/g, "&#039;");
+    }
 
 
-/* ============================================================
-   UTILITIES
-============================================================ */
+    function setStatus(
+      type,
+      message
+    ) {
 
-function sum(field) {
+      const dot =
+        document.getElementById(
+          "statusDot"
+        );
 
-  return filteredFeatures.reduce(
-    (total, feature) => {
-
-      const value =
-        Number(
-          feature.attributes[field]
+      const text =
+        document.getElementById(
+          "statusText"
         );
 
 
-      return total +
-        (
-          Number.isFinite(value)
-            ? value
-            : 0
-        );
+      dot.className =
+        `status-dot ${type}`;
 
-    },
-    0
-  );
 
-}
-
-
-function isYes(value) {
-
-  if (
-    value === null ||
-    value === undefined
-  ) {
-    return false;
-  }
-
-
-  const v =
-    String(value)
-      .trim()
-      .toLowerCase();
-
-
-  return [
-
-    "yes",
-    "y",
-    "true",
-    "1",
-    "available",
-    "open"
-
-  ].includes(v);
-
-}
-
-
-function clean(value) {
-
-  if (
-    value === null ||
-    value === undefined
-  ) {
-
-    return "";
-
-  }
-
-
-  return String(value).trim();
-
-}
-
-
-function getValue(id) {
-
-  return document
-    .getElementById(id)
-    .value
-    .trim();
-
-}
-
-
-function format(value) {
-
-  return Number(
-    value || 0
-  ).toLocaleString();
-
-}
-
-
-function setText(id, value) {
-
-  const element =
-    document.getElementById(id);
-
-
-  if (element) {
-
-    element.textContent =
-      value;
-
-  }
-
-}
-
-
-/* ============================================================
-   STATUS
-============================================================ */
-
-function setStatus(
-  type,
-  message
-) {
-
-  const dot =
-    document.getElementById(
-      "statusDot"
-    );
-
-
-  const text =
-    document.getElementById(
-      "connectionText"
-    );
-
-
-  dot.className =
-    "status-dot";
-
-
-  if (type === "success") {
-
-    dot.classList.add(
-      "status-success"
-    );
-
-  }
-
-
-  if (type === "error") {
-
-    dot.classList.add(
-      "status-error"
-    );
-
-  }
-
-
-  text.textContent =
-    message;
-
-}
-
-
-/* ============================================================
-   ERROR DISPLAY
-============================================================ */
-
-function showError(error) {
-
-  console.error(
-    error
-  );
-
-
-  let message;
-
-
-  if (
-    error &&
-    error.message
-  ) {
-
-    message =
-      error.message;
-
-  }
-
-  else {
-
-    try {
-
-      message =
-        JSON.stringify(
-          error,
-          null,
-          2
-        );
-
+      text.textContent =
+        message;
     }
 
-    catch {
 
-      message =
-        String(error);
+    /*
+     * ==========================================================
+     * START APPLICATION
+     * ==========================================================
+     */
 
-    }
+    initializeMap();
 
-  }
+    loadFeatures();
 
-
-  document.getElementById(
-    "errorBox"
-  ).textContent =
-
-    "ArcGIS connection error:\n\n" +
-
-    message;
-
-
-  document.getElementById(
-    "errorBox"
-  ).style.display =
-    "block";
-
-
-  setStatus(
-    "error",
-    "ArcGIS connection error — see details above"
-  );
-
-}
-
-
-/* ============================================================
-   RUN
-============================================================ */
-
-startDashboard();
-
-</script>
+  </script>
 
 </body>
 </html>
