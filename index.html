@@ -6,32 +6,28 @@
 
 <title>GIS Parking & Infrastructure Dashboard</title>
 
-<link
-  rel="stylesheet"
-  href="https://js.arcgis.com/4.34/esri/themes/light/main.css"
-/>
+<!-- ArcGIS Maps SDK -->
+<link rel="stylesheet"
+      href="https://js.arcgis.com/4.34/esri/themes/light/main.css">
 
+<script type="module"
+        src="https://js.arcgis.com/4.34/"></script>
+
+<!-- Chart.js -->
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-<script src="https://js.arcgis.com/4.34/"></script>
 
 <style>
-
 * {
   box-sizing: border-box;
 }
 
-html,
-body {
+html, body {
   margin: 0;
   padding: 0;
   font-family: Arial, Helvetica, sans-serif;
   background: #eef2f5;
   color: #17202a;
 }
-
-/* =========================================================
-   HEADER
-========================================================= */
 
 .header {
   background: #123b56;
@@ -41,7 +37,7 @@ body {
 
 .header h1 {
   margin: 0;
-  font-size: 27px;
+  font-size: 28px;
 }
 
 .header p {
@@ -49,24 +45,18 @@ body {
   opacity: .85;
 }
 
-/* =========================================================
-   MAIN
-========================================================= */
-
 .container {
   max-width: 1800px;
   margin: auto;
   padding: 20px;
 }
 
-/* =========================================================
-   CONNECTION STATUS
-========================================================= */
+/* CONNECTION */
 
 .connection {
   background: white;
   border-radius: 12px;
-  padding: 12px 16px;
+  padding: 13px 17px;
   margin-bottom: 15px;
   box-shadow: 0 2px 8px rgba(0,0,0,.06);
   display: flex;
@@ -79,11 +69,8 @@ body {
   width: 11px;
   height: 11px;
   border-radius: 50%;
-  background: #999;
-}
-
-.status-loading {
   background: #f39c12;
+  flex: 0 0 auto;
 }
 
 .status-success {
@@ -94,9 +81,7 @@ body {
   background: #e74c3c;
 }
 
-/* =========================================================
-   FILTERS
-========================================================= */
+/* PANELS */
 
 .panel {
   background: white;
@@ -105,13 +90,15 @@ body {
   box-shadow: 0 2px 10px rgba(0,0,0,.06);
 }
 
-.filters {
-  margin-bottom: 18px;
+.panel h2 {
+  margin: 0 0 15px;
+  font-size: 18px;
 }
 
-.filters h2 {
-  margin: 0 0 14px;
-  font-size: 18px;
+/* FILTERS */
+
+.filters {
+  margin-bottom: 18px;
 }
 
 .filter-grid {
@@ -145,9 +132,21 @@ button:hover {
   background: #126494;
 }
 
-/* =========================================================
-   KPI CARDS
-========================================================= */
+/* ERROR */
+
+#errorBox {
+  display: none;
+  background: #fff0f0;
+  border: 1px solid #e2aaaa;
+  color: #842020;
+  padding: 15px;
+  border-radius: 10px;
+  margin-bottom: 18px;
+  white-space: pre-wrap;
+  word-break: break-word;
+}
+
+/* KPIs */
 
 .kpi-grid {
   display: grid;
@@ -160,7 +159,7 @@ button:hover {
   background: white;
   border-radius: 12px;
   padding: 20px;
-  min-height: 110px;
+  min-height: 115px;
   box-shadow: 0 2px 10px rgba(0,0,0,.06);
 }
 
@@ -173,27 +172,18 @@ button:hover {
 
 .kpi-value {
   margin-top: 10px;
-  font-size: 30px;
+  font-size: 29px;
   font-weight: bold;
   color: #123b56;
 }
 
-/* =========================================================
-   MAP + SUMMARY
-========================================================= */
+/* MAIN */
 
 .main-grid {
   display: grid;
   grid-template-columns: 2fr 1fr;
   gap: 18px;
   margin-bottom: 18px;
-}
-
-.map-panel h2,
-.summary-panel h2,
-.chart-panel h2 {
-  margin: 0 0 15px;
-  font-size: 18px;
 }
 
 #viewDiv {
@@ -203,13 +193,12 @@ button:hover {
   overflow: hidden;
 }
 
-/* =========================================================
-   SUMMARY
-========================================================= */
+/* SUMMARY */
 
 .summary-item {
   display: flex;
   justify-content: space-between;
+  gap: 15px;
   padding: 11px 0;
   border-bottom: 1px solid #e6e9ec;
 }
@@ -225,6 +214,7 @@ button:hover {
 .summary-value {
   color: #123b56;
   font-weight: bold;
+  text-align: right;
 }
 
 .info-box {
@@ -233,23 +223,10 @@ button:hover {
   border-radius: 8px;
   padding: 14px;
   font-size: 13px;
+  line-height: 1.7;
 }
 
-.error-box {
-  background: #fff0f0;
-  border: 1px solid #e5aaaa;
-  color: #8b2222;
-  border-radius: 8px;
-  padding: 14px;
-  margin-top: 12px;
-  display: none;
-  white-space: pre-wrap;
-  word-break: break-word;
-}
-
-/* =========================================================
-   CHARTS
-========================================================= */
+/* CHARTS */
 
 .charts-grid {
   display: grid;
@@ -262,12 +239,9 @@ button:hover {
   height: 310px;
 }
 
-/* =========================================================
-   RESPONSIVE
-========================================================= */
+/* RESPONSIVE */
 
 @media(max-width: 1200px) {
-
   .kpi-grid {
     grid-template-columns: repeat(3, 1fr);
   }
@@ -282,7 +256,6 @@ button:hover {
 }
 
 @media(max-width: 700px) {
-
   .container {
     padding: 10px;
   }
@@ -303,311 +276,198 @@ button:hover {
     height: 450px;
   }
 }
-
 </style>
 </head>
 
 <body>
 
-<!-- =======================================================
-     HEADER
-======================================================== -->
-
 <div class="header">
-
-  <h1>
-    GIS Parking & Infrastructure Dashboard
-  </h1>
-
-  <p>
-    Interactive analysis of ArcGIS Online feature data
-  </p>
-
+  <h1>GIS Parking & Infrastructure Dashboard</h1>
+  <p>Interactive analysis of ArcGIS Online feature data</p>
 </div>
-
 
 <div class="container">
 
-
-<!-- =======================================================
-     CONNECTION STATUS
-======================================================== -->
-
-<div class="connection">
-
-  <div
-    id="statusDot"
-    class="status-dot status-loading">
+  <!-- CONNECTION STATUS -->
+  <div class="connection">
+    <div id="statusDot" class="status-dot"></div>
+    <div id="connectionText">
+      Connecting to ArcGIS Online...
+    </div>
   </div>
 
-  <div id="connectionText">
-    Connecting to ArcGIS Online...
+  <!-- FILTERS -->
+  <div class="panel filters">
+
+    <h2>Filters</h2>
+
+    <div class="filter-grid">
+
+      <select id="countyFilter">
+        <option value="">All Counties</option>
+      </select>
+
+      <select id="districtFilter">
+        <option value="">All Districts</option>
+      </select>
+
+      <select id="cityFilter">
+        <option value="">All Cities</option>
+      </select>
+
+      <select id="ownershipFilter">
+        <option value="">All Ownership Types</option>
+      </select>
+
+      <button id="resetButton">
+        Reset Filters
+      </button>
+
+    </div>
   </div>
 
-</div>
+  <!-- ERROR -->
+  <div id="errorBox"></div>
 
+  <!-- KPI CARDS -->
+  <div class="kpi-grid">
 
-<!-- =======================================================
-     FILTERS
-======================================================== -->
-
-<div class="panel filters">
-
-  <h2>Filters</h2>
-
-  <div class="filter-grid">
-
-    <select id="countyFilter">
-      <option value="">All Counties</option>
-    </select>
-
-    <select id="districtFilter">
-      <option value="">All Districts</option>
-    </select>
-
-    <select id="cityFilter">
-      <option value="">All Cities</option>
-    </select>
-
-    <select id="ownershipFilter">
-      <option value="">All Ownership Types</option>
-    </select>
-
-    <button id="resetButton">
-      Reset Filters
-    </button>
-
-  </div>
-
-</div>
-
-
-<!-- =======================================================
-     ERROR MESSAGE
-======================================================== -->
-
-<div
-  id="errorBox"
-  class="error-box">
-</div>
-
-
-<!-- =======================================================
-     KPI CARDS
-======================================================== -->
-
-<div class="kpi-grid">
-
-  <div class="kpi">
-
-    <div class="kpi-label">
-      Total Locations
+    <div class="kpi">
+      <div class="kpi-label">Total Locations</div>
+      <div class="kpi-value" id="totalLocations">--</div>
     </div>
 
-    <div
-      class="kpi-value"
-      id="totalLocations">
-      --
+    <div class="kpi">
+      <div class="kpi-label">Parking Inventory</div>
+      <div class="kpi-value" id="totalParking">--</div>
+    </div>
+
+    <div class="kpi">
+      <div class="kpi-label">Total Area (Sq Ft)</div>
+      <div class="kpi-value" id="totalArea">--</div>
+    </div>
+
+    <div class="kpi">
+      <div class="kpi-label">24 Hour Locations</div>
+      <div class="kpi-value" id="open24">--</div>
+    </div>
+
+    <div class="kpi">
+      <div class="kpi-label">EV Charging Locations</div>
+      <div class="kpi-value" id="evLocations">--</div>
     </div>
 
   </div>
 
+  <!-- MAP / SUMMARY -->
+  <div class="main-grid">
 
-  <div class="kpi">
-
-    <div class="kpi-label">
-      Parking Inventory
+    <div class="panel">
+      <h2>GIS Map</h2>
+      <div id="viewDiv"></div>
     </div>
 
-    <div
-      class="kpi-value"
-      id="totalParking">
-      --
+    <div class="panel">
+
+      <h2>Summary</h2>
+
+      <p>
+        Use the filters to explore the GIS dataset.
+        Click a feature on the map to inspect an individual
+        location.
+      </p>
+
+      <hr>
+
+      <div class="summary-item">
+        <span class="summary-label">Selected Locations</span>
+        <span class="summary-value" id="summaryLocations">--</span>
+      </div>
+
+      <div class="summary-item">
+        <span class="summary-label">Parking Spaces</span>
+        <span class="summary-value" id="summaryParking">--</span>
+      </div>
+
+      <div class="summary-item">
+        <span class="summary-label">Total Area</span>
+        <span class="summary-value" id="summaryArea">--</span>
+      </div>
+
+      <div class="summary-item">
+        <span class="summary-label">EV Charging</span>
+        <span class="summary-value" id="summaryEV">--</span>
+      </div>
+
+      <div class="summary-item">
+        <span class="summary-label">Repair Facilities</span>
+        <span class="summary-value" id="summaryRepair">--</span>
+      </div>
+
+      <div class="info-box">
+
+        <strong>Data Source</strong><br>
+        ArcGIS Online Feature Service
+
+        <br><br>
+
+        <strong>Records:</strong>
+        <span id="recordCount">--</span>
+
+        <br>
+
+        <strong>Current Filter:</strong>
+        <span id="currentFilter">All Records</span>
+
+      </div>
+
     </div>
 
   </div>
 
+  <!-- CHARTS -->
+  <div class="charts-grid">
 
-  <div class="kpi">
-
-    <div class="kpi-label">
-      Total Area (sq ft)
+    <div class="panel">
+      <h2>Locations by County</h2>
+      <div class="chart-container">
+        <canvas id="countyChart"></canvas>
+      </div>
     </div>
 
-    <div
-      class="kpi-value"
-      id="totalArea">
-      --
+    <div class="panel">
+      <h2>Parking Inventory by County</h2>
+      <div class="chart-container">
+        <canvas id="parkingChart"></canvas>
+      </div>
     </div>
 
-  </div>
-
-
-  <div class="kpi">
-
-    <div class="kpi-label">
-      24 Hour Locations
+    <div class="panel">
+      <h2>Ownership Distribution</h2>
+      <div class="chart-container">
+        <canvas id="ownershipChart"></canvas>
+      </div>
     </div>
 
-    <div
-      class="kpi-value"
-      id="open24">
-      --
+    <div class="panel">
+      <h2>EV Charging</h2>
+      <div class="chart-container">
+        <canvas id="evChart"></canvas>
+      </div>
     </div>
 
-  </div>
-
-
-  <div class="kpi">
-
-    <div class="kpi-label">
-      EV Charging Locations
+    <div class="panel">
+      <h2>24-Hour Availability</h2>
+      <div class="chart-container">
+        <canvas id="open24Chart"></canvas>
+      </div>
     </div>
 
-    <div
-      class="kpi-value"
-      id="evLocations">
-      --
-    </div>
-
-  </div>
-
-</div>
-
-
-<!-- =======================================================
-     MAP + SUMMARY
-======================================================== -->
-
-<div class="main-grid">
-
-
-  <!-- MAP -->
-
-  <div class="panel map-panel">
-
-    <h2>
-      GIS Map
-    </h2>
-
-    <div id="viewDiv"></div>
-
-  </div>
-
-
-  <!-- SUMMARY -->
-
-  <div class="panel summary-panel">
-
-    <h2>
-      Summary
-    </h2>
-
-    <p>
-      Use the filters to explore the GIS dataset.
-      Selecting a feature on the map will display
-      its detailed information.
-    </p>
-
-
-    <hr>
-
-
-    <div class="summary-item">
-
-      <span class="summary-label">
-        Selected Locations
-      </span>
-
-      <span
-        class="summary-value"
-        id="summaryLocations">
-        --
-      </span>
-
-    </div>
-
-
-    <div class="summary-item">
-
-      <span class="summary-label">
-        Parking Spaces
-      </span>
-
-      <span
-        class="summary-value"
-        id="summaryParking">
-        --
-      </span>
-
-    </div>
-
-
-    <div class="summary-item">
-
-      <span class="summary-label">
-        Total Area
-      </span>
-
-      <span
-        class="summary-value"
-        id="summaryArea">
-        --
-      </span>
-
-    </div>
-
-
-    <div class="summary-item">
-
-      <span class="summary-label">
-        EV Charging
-      </span>
-
-      <span
-        class="summary-value"
-        id="summaryEV">
-        --
-      </span>
-
-    </div>
-
-
-    <div class="summary-item">
-
-      <span class="summary-label">
-        Repair Facilities
-      </span>
-
-      <span
-        class="summary-value"
-        id="summaryRepair">
-        --
-      </span>
-
-    </div>
-
-
-    <div class="info-box">
-
-      <strong>Data Source</strong>
-
-      <br><br>
-
-      Truck Parking Inventory
-
-      <br>
-
-      <strong>Records:</strong>
-      <span id="recordCount">--</span>
-
-      <br>
-
-      <strong>Current Filter:</strong>
-      <span id="currentFilter">
-        All Records
-      </span>
-
+    <div class="panel">
+      <h2>Repair Facilities</h2>
+      <div class="chart-container">
+        <canvas id="repairChart"></canvas>
+      </div>
     </div>
 
   </div>
@@ -615,195 +475,1499 @@ button:hover {
 </div>
 
 
-<!-- =======================================================
-     CHARTS
-======================================================== -->
-
-<div class="charts-grid">
-
-
-  <div class="panel chart-panel">
-
-    <h2>
-      Locations by County
-    </h2>
-
-    <div class="chart-container">
-
-      <canvas id="countyChart"></canvas>
-
-    </div>
-
-  </div>
-
-
-  <div class="panel chart-panel">
-
-    <h2>
-      Parking Inventory by County
-    </h2>
-
-    <div class="chart-container">
-
-      <canvas id="parkingChart"></canvas>
-
-    </div>
-
-  </div>
-
-
-  <div class="panel chart-panel">
-
-    <h2>
-      Ownership Distribution
-    </h2>
-
-    <div class="chart-container">
-
-      <canvas id="ownershipChart"></canvas>
-
-    </div>
-
-  </div>
-
-
-  <div class="panel chart-panel">
-
-    <h2>
-      EV Charging
-    </h2>
-
-    <div class="chart-container">
-
-      <canvas id="evChart"></canvas>
-
-    </div>
-
-  </div>
-
-
-  <div class="panel chart-panel">
-
-    <h2>
-      24-Hour Availability
-    </h2>
-
-    <div class="chart-container">
-
-      <canvas id="open24Chart"></canvas>
-
-    </div>
-
-  </div>
-
-
-  <div class="panel chart-panel">
-
-    <h2>
-      Repair Facilities
-    </h2>
-
-    <div class="chart-container">
-
-      <canvas id="repairChart"></canvas>
-
-    </div>
-
-  </div>
-
-</div>
-
-</div>
-
-
-<script>
+<script type="module">
 
 /* ============================================================
    ============================================================
-   YOUR ARCGIS ONLINE FEATURE SERVICE
+   AGO SERVICE URL
    ============================================================
+   THIS IS THE ONLY PLACE YOU NEED TO CHANGE THE SERVICE.
    ============================================================ */
 
-const FEATURE_SERVICE_URL =
+const AGO_SERVICE_URL =
   "https://services.arcgis.com/KTcxiTD9dsQw4r7Z/arcgis/rest/services/Truck_Parking_Inventory/FeatureServer/2";
 
 
 /* ============================================================
-   GLOBAL VARIABLES
+   GLOBALS
 ============================================================ */
 
-let featureLayer = null;
+let Map;
+let MapView;
+let FeatureLayer;
 
-let map = null;
-
-let view = null;
+let map;
+let view;
+let featureLayer;
 
 let allFeatures = [];
-
 let filteredFeatures = [];
 
 let charts = {};
 
-let layerFields = {};
 
-let objectIdField = "OBJECTID";
+/* ============================================================
+   EXPECTED DATA FIELDS
+============================================================ */
+
+const FIELDS = {
+  county: "CNTY_NM",
+  district: "DIST_NM",
+  city: "CITY_NM",
+  parking: "Parking_Inventory",
+  ownership: "OWNERSHIP",
+  open24: "OPENTWNTYFOURHOUR",
+  repair: "REPAIRFACILITIES",
+  heavyEV: "HEAVYDUTY_EVCHARGE",
+  lightEV: "LIGHTDUTY_EVCHARGE",
+  area: "SQFT_AREA"
+};
 
 
 /* ============================================================
-   EXPECTED FIELDS
+   START APPLICATION
 ============================================================ */
 
-const EXPECTED_FIELDS = [
+async function startDashboard() {
 
-  "OBJECTID",
+  try {
 
-  "CNTY_NM",
+    setStatus(
+      "loading",
+      "Loading ArcGIS Maps SDK..."
+    );
 
-  "DIST_NM",
 
-  "CITY_NM",
+    /* ========================================================
+       NEW ARC GIS MODULE LOADER
+       NO "require()" IS USED ANYWHERE.
+    ======================================================== */
 
-  "Parking_Inventory",
+    [
+      Map,
+      MapView,
+      FeatureLayer
 
-  "OWNERSHIP",
+    ] = await $arcgis.import([
 
-  "OPENTWENTYFOURHOUR",
+      "@arcgis/core/Map.js",
 
-  "REPAIRFACILITIES",
+      "@arcgis/core/views/MapView.js",
 
-  "HEAVYDUTY_EVCHARGE",
+      "@arcgis/core/layers/FeatureLayer.js"
 
-  "LIGHTDUTY_EVCHARGE",
+    ]);
 
-  "SQFT_AREA"
 
-];
+    setStatus(
+      "loading",
+      "Connecting to ArcGIS Online..."
+    );
+
+
+    /* ========================================================
+       CREATE FEATURE LAYER
+    ======================================================== */
+
+    featureLayer =
+      new FeatureLayer({
+
+        url: AGO_SERVICE_URL,
+
+        outFields: ["*"],
+
+        popupTemplate: {
+
+          title:
+            "{CITY_NM}",
+
+          content: [
+
+            {
+              type: "fields",
+
+              fieldInfos: [
+
+                {
+                  fieldName: "CNTY_NM",
+                  label: "County"
+                },
+
+                {
+                  fieldName: "DIST_NM",
+                  label: "District"
+                },
+
+                {
+                  fieldName: "CITY_NM",
+                  label: "City"
+                },
+
+                {
+                  fieldName: "Parking_Inventory",
+                  label: "Parking Inventory"
+                },
+
+                {
+                  fieldName: "OWNERSHIP",
+                  label: "Ownership"
+                },
+
+                {
+                  fieldName: "OPENTWNTYFOURHOUR",
+                  label: "Open 24 Hours"
+                },
+
+                {
+                  fieldName: "REPAIRFACILITIES",
+                  label: "Repair Facilities"
+                },
+
+                {
+                  fieldName: "HEAVYDUTY_EVCHARGE",
+                  label: "Heavy Duty EV Charging"
+                },
+
+                {
+                  fieldName: "LIGHTDUTY_EVCHARGE",
+                  label: "Light Duty EV Charging"
+                },
+
+                {
+                  fieldName: "SQFT_AREA",
+                  label: "Area (Sq Ft)"
+                }
+
+              ]
+            }
+
+          ]
+
+        }
+
+      });
+
+
+    /* ========================================================
+       LOAD SERVICE
+    ======================================================== */
+
+    await featureLayer.load();
+
+
+    console.log(
+      "Feature service loaded:",
+      featureLayer
+    );
+
+
+    console.log(
+      "Feature service fields:",
+      featureLayer.fields.map(
+        f => f.name
+      )
+    );
+
+
+    /* ========================================================
+       CREATE MAP
+    ======================================================== */
+
+    map =
+      new Map({
+
+        basemap:
+          "gray-vector",
+
+        layers:
+          [featureLayer]
+
+      });
+
+
+    /* ========================================================
+       CREATE MAP VIEW
+    ======================================================== */
+
+    view =
+      new MapView({
+
+        container:
+          "viewDiv",
+
+        map:
+          map,
+
+        center:
+          [-98, 38],
+
+        zoom:
+          4
+
+      });
+
+
+    await view.when();
+
+
+    /* ========================================================
+       LOAD FEATURES
+    ======================================================== */
+
+    setStatus(
+      "loading",
+      "Connected. Loading GIS records..."
+    );
+
+
+    await loadFeatures();
+
+
+    /* ========================================================
+       INITIAL DASHBOARD
+    ======================================================== */
+
+    filteredFeatures =
+      [...allFeatures];
+
+
+    document.getElementById(
+      "recordCount"
+    ).textContent =
+      allFeatures.length.toLocaleString();
+
+
+    populateFilters();
+
+    updateDashboard();
+
+
+    /* ========================================================
+       ZOOM TO SERVICE
+    ======================================================== */
+
+    if (featureLayer.fullExtent) {
+
+      await view.goTo(
+        featureLayer.fullExtent.expand(1.1)
+      );
+
+    }
+
+
+    /* ========================================================
+       CLICK MAP FEATURE
+    ======================================================== */
+
+    view.on(
+      "click",
+      async event => {
+
+        const response =
+          await view.hitTest(event);
+
+
+        const result =
+          response.results.find(
+            item =>
+              item.graphic &&
+              item.graphic.layer ===
+              featureLayer
+          );
+
+
+        if (!result) {
+          return;
+        }
+
+
+        updateSelectedFeature(
+          result.graphic.attributes
+        );
+
+      }
+    );
+
+
+    setStatus(
+      "success",
+      "Connected — " +
+      allFeatures.length.toLocaleString() +
+      " features loaded"
+    );
+
+  }
+
+  catch (error) {
+
+    console.error(
+      "DASHBOARD ERROR:",
+      error
+    );
+
+    showError(error);
+
+  }
+
+}
 
 
 /* ============================================================
-   STATUS HELPERS
+   LOAD ALL FEATURES
 ============================================================ */
 
-function setStatus(type, message) {
+async function loadFeatures() {
+
+  allFeatures = [];
+
+  let offset = 0;
+
+  const pageSize = 1000;
+
+
+  while (true) {
+
+    console.log(
+      "Querying records from offset:",
+      offset
+    );
+
+
+    const result =
+      await featureLayer.queryFeatures({
+
+        where:
+          "1=1",
+
+        outFields:
+          ["*"],
+
+        returnGeometry:
+          true,
+
+        resultOffset:
+          offset,
+
+        resultRecordCount:
+          pageSize
+
+      });
+
+
+    if (
+      !result ||
+      !result.features
+    ) {
+
+      throw new Error(
+        "ArcGIS returned an invalid FeatureSet."
+      );
+
+    }
+
+
+    allFeatures.push(
+      ...result.features
+    );
+
+
+    console.log(
+      "Records loaded:",
+      allFeatures.length
+    );
+
+
+    if (
+      !result.exceededTransferLimit ||
+      result.features.length === 0
+    ) {
+
+      break;
+
+    }
+
+
+    offset +=
+      result.features.length;
+
+  }
+
+
+  console.log(
+    "TOTAL FEATURES:",
+    allFeatures.length
+  );
+
+}
+
+
+/* ============================================================
+   FILTERS
+============================================================ */
+
+function populateFilters() {
+
+  populateSelect(
+    "countyFilter",
+    FIELDS.county,
+    "All Counties"
+  );
+
+  populateSelect(
+    "districtFilter",
+    FIELDS.district,
+    "All Districts"
+  );
+
+  populateSelect(
+    "cityFilter",
+    FIELDS.city,
+    "All Cities"
+  );
+
+  populateSelect(
+    "ownershipFilter",
+    FIELDS.ownership,
+    "All Ownership Types"
+  );
+
+}
+
+
+function populateSelect(
+  id,
+  field,
+  defaultText
+) {
+
+  const select =
+    document.getElementById(id);
+
+  select.innerHTML = "";
+
+
+  const first =
+    document.createElement("option");
+
+  first.value = "";
+
+  first.textContent =
+    defaultText;
+
+  select.appendChild(first);
+
+
+  const values =
+    new Set();
+
+
+  allFeatures.forEach(
+    feature => {
+
+      const value =
+        feature.attributes[field];
+
+
+      if (
+        value !== null &&
+        value !== undefined &&
+        String(value).trim() !== ""
+      ) {
+
+        values.add(
+          String(value).trim()
+        );
+
+      }
+
+    }
+  );
+
+
+  [...values]
+    .sort(
+      (a,b) =>
+        a.localeCompare(b)
+    )
+    .forEach(
+      value => {
+
+        const option =
+          document.createElement(
+            "option"
+          );
+
+        option.value = value;
+
+        option.textContent = value;
+
+        select.appendChild(
+          option
+        );
+
+      }
+    );
+
+}
+
+
+/* ============================================================
+   FILTER EVENT LISTENERS
+============================================================ */
+
+[
+  "countyFilter",
+  "districtFilter",
+  "cityFilter",
+  "ownershipFilter"
+
+].forEach(id => {
+
+  document
+    .getElementById(id)
+    .addEventListener(
+      "change",
+      applyFilters
+    );
+
+});
+
+
+/* ============================================================
+   APPLY FILTERS
+============================================================ */
+
+function applyFilters() {
+
+  const county =
+    getValue("countyFilter");
+
+  const district =
+    getValue("districtFilter");
+
+  const city =
+    getValue("cityFilter");
+
+  const ownership =
+    getValue("ownershipFilter");
+
+
+  filteredFeatures =
+    allFeatures.filter(
+      feature => {
+
+        const a =
+          feature.attributes;
+
+
+        return (
+
+          (!county ||
+            clean(a[FIELDS.county]) === county)
+
+          &&
+
+          (!district ||
+            clean(a[FIELDS.district]) === district)
+
+          &&
+
+          (!city ||
+            clean(a[FIELDS.city]) === city)
+
+          &&
+
+          (!ownership ||
+            clean(a[FIELDS.ownership]) === ownership)
+
+        );
+
+      }
+    );
+
+
+  /* Update map filtering */
+
+  featureLayer.definitionExpression =
+    buildDefinitionExpression();
+
+
+  updateDashboard();
+
+}
+
+
+/* ============================================================
+   RESET
+============================================================ */
+
+document
+  .getElementById("resetButton")
+  .addEventListener(
+    "click",
+    () => {
+
+      [
+        "countyFilter",
+        "districtFilter",
+        "cityFilter",
+        "ownershipFilter"
+
+      ].forEach(id => {
+
+        document.getElementById(id).value = "";
+
+      });
+
+
+      featureLayer.definitionExpression =
+        "1=1";
+
+
+      filteredFeatures =
+        [...allFeatures];
+
+
+      updateDashboard();
+
+    }
+  );
+
+
+/* ============================================================
+   DEFINITION EXPRESSION
+============================================================ */
+
+function buildDefinitionExpression() {
+
+  const conditions = [];
+
+
+  const filters = [
+
+    [
+      "countyFilter",
+      FIELDS.county
+    ],
+
+    [
+      "districtFilter",
+      FIELDS.district
+    ],
+
+    [
+      "cityFilter",
+      FIELDS.city
+    ],
+
+    [
+      "ownershipFilter",
+      FIELDS.ownership
+    ]
+
+  ];
+
+
+  filters.forEach(
+    ([elementId, field]) => {
+
+      const value =
+        getValue(elementId);
+
+
+      if (value) {
+
+        conditions.push(
+          `${field} = '${sqlEscape(value)}'`
+        );
+
+      }
+
+    }
+  );
+
+
+  return conditions.length
+    ? conditions.join(" AND ")
+    : "1=1";
+
+}
+
+
+function sqlEscape(value) {
+
+  return String(value)
+    .replace(/'/g, "''");
+
+}
+
+
+/* ============================================================
+   UPDATE EVERYTHING
+============================================================ */
+
+function updateDashboard() {
+
+  updateKPIs();
+
+  updateSummary();
+
+  updateCharts();
+
+  updateCurrentFilter();
+
+}
+
+
+/* ============================================================
+   KPI
+============================================================ */
+
+function updateKPIs() {
+
+  const locations =
+    filteredFeatures.length;
+
+
+  const parking =
+    sum(FIELDS.parking);
+
+
+  const area =
+    sum(FIELDS.area);
+
+
+  const open24 =
+    filteredFeatures.filter(
+      feature =>
+        isYes(
+          feature.attributes[
+            FIELDS.open24
+          ]
+        )
+    ).length;
+
+
+  const ev =
+    filteredFeatures.filter(
+      feature =>
+
+        isYes(
+          feature.attributes[
+            FIELDS.heavyEV
+          ]
+        )
+
+        ||
+
+        isYes(
+          feature.attributes[
+            FIELDS.lightEV
+          ]
+        )
+
+    ).length;
+
+
+  setText(
+    "totalLocations",
+    format(locations)
+  );
+
+  setText(
+    "totalParking",
+    format(parking)
+  );
+
+  setText(
+    "totalArea",
+    format(Math.round(area))
+  );
+
+  setText(
+    "open24",
+    format(open24)
+  );
+
+  setText(
+    "evLocations",
+    format(ev)
+  );
+
+}
+
+
+/* ============================================================
+   SUMMARY
+============================================================ */
+
+function updateSummary() {
+
+  setText(
+    "summaryLocations",
+    format(filteredFeatures.length)
+  );
+
+
+  setText(
+    "summaryParking",
+    format(
+      sum(FIELDS.parking)
+    )
+  );
+
+
+  setText(
+    "summaryArea",
+    format(
+      Math.round(
+        sum(FIELDS.area)
+      )
+    ) + " sq ft"
+  );
+
+
+  const ev =
+    filteredFeatures.filter(
+      feature =>
+
+        isYes(
+          feature.attributes[
+            FIELDS.heavyEV
+          ]
+        )
+
+        ||
+
+        isYes(
+          feature.attributes[
+            FIELDS.lightEV
+          ]
+        )
+
+    ).length;
+
+
+  const repair =
+    filteredFeatures.filter(
+      feature =>
+        isYes(
+          feature.attributes[
+            FIELDS.repair
+          ]
+        )
+    ).length;
+
+
+  setText(
+    "summaryEV",
+    format(ev)
+  );
+
+
+  setText(
+    "summaryRepair",
+    format(repair)
+  );
+
+}
+
+
+/* ============================================================
+   CHARTS
+============================================================ */
+
+function updateCharts() {
+
+  createBarChart(
+    "countyChart",
+    groupCount(FIELDS.county),
+    "#187db8"
+  );
+
+
+  createBarChart(
+    "parkingChart",
+    groupSum(FIELDS.county, FIELDS.parking),
+    "#20a36a"
+  );
+
+
+  createDoughnutChart(
+    "ownershipChart",
+    groupCount(FIELDS.ownership)
+  );
+
+
+  createDoughnutChart(
+    "evChart",
+    {
+      "Heavy Duty EV":
+        filteredFeatures.filter(
+          f =>
+            isYes(
+              f.attributes[FIELDS.heavyEV]
+            )
+        ).length,
+
+      "Light Duty EV":
+        filteredFeatures.filter(
+          f =>
+            isYes(
+              f.attributes[FIELDS.lightEV]
+            )
+        ).length,
+
+      "No EV":
+        filteredFeatures.filter(
+          f =>
+            !isYes(
+              f.attributes[FIELDS.heavyEV]
+            )
+            &&
+            !isYes(
+              f.attributes[FIELDS.lightEV]
+            )
+        ).length
+    }
+  );
+
+
+  createDoughnutChart(
+    "open24Chart",
+    {
+      "24 Hours":
+        filteredFeatures.filter(
+          f =>
+            isYes(
+              f.attributes[FIELDS.open24]
+            )
+        ).length,
+
+      "Not 24 Hours":
+        filteredFeatures.filter(
+          f =>
+            !isYes(
+              f.attributes[FIELDS.open24]
+            )
+        ).length
+    }
+  );
+
+
+  createDoughnutChart(
+    "repairChart",
+    {
+      "Repair Facility":
+        filteredFeatures.filter(
+          f =>
+            isYes(
+              f.attributes[FIELDS.repair]
+            )
+        ).length,
+
+      "No Repair Facility":
+        filteredFeatures.filter(
+          f =>
+            !isYes(
+              f.attributes[FIELDS.repair]
+            )
+        ).length
+    }
+  );
+
+}
+
+
+/* ============================================================
+   GROUP COUNT
+============================================================ */
+
+function groupCount(field) {
+
+  const result = {};
+
+
+  filteredFeatures.forEach(
+    feature => {
+
+      const value =
+        clean(
+          feature.attributes[field]
+        ) || "Unknown";
+
+
+      result[value] =
+        (result[value] || 0) + 1;
+
+    }
+  );
+
+
+  return result;
+
+}
+
+
+/* ============================================================
+   GROUP SUM
+============================================================ */
+
+function groupSum(
+  groupField,
+  valueField
+) {
+
+  const result = {};
+
+
+  filteredFeatures.forEach(
+    feature => {
+
+      const group =
+        clean(
+          feature.attributes[groupField]
+        ) || "Unknown";
+
+
+      const value =
+        Number(
+          feature.attributes[valueField]
+        ) || 0;
+
+
+      result[group] =
+        (result[group] || 0) + value;
+
+    }
+  );
+
+
+  return result;
+
+}
+
+
+/* ============================================================
+   BAR CHART
+============================================================ */
+
+function createBarChart(
+  id,
+  object,
+  color
+) {
+
+  destroyChart(id);
+
+
+  const labels =
+    Object.keys(object);
+
+
+  const values =
+    Object.values(object);
+
+
+  charts[id] =
+    new Chart(
+      document.getElementById(id),
+      {
+
+        type: "bar",
+
+        data: {
+
+          labels,
+
+          datasets: [
+
+            {
+              data: values,
+
+              backgroundColor: color,
+
+              borderRadius: 5
+            }
+
+          ]
+
+        },
+
+        options: {
+
+          responsive: true,
+
+          maintainAspectRatio: false,
+
+          plugins: {
+
+            legend: {
+              display: false
+            }
+
+          },
+
+          scales: {
+
+            y: {
+              beginAtZero: true
+            }
+
+          }
+
+        }
+
+      }
+    );
+
+}
+
+
+/* ============================================================
+   DOUGHNUT CHART
+============================================================ */
+
+function createDoughnutChart(
+  id,
+  object
+) {
+
+  destroyChart(id);
+
+
+  charts[id] =
+    new Chart(
+      document.getElementById(id),
+      {
+
+        type: "doughnut",
+
+        data: {
+
+          labels:
+            Object.keys(object),
+
+          datasets: [
+
+            {
+
+              data:
+                Object.values(object),
+
+              backgroundColor: [
+
+                "#187db8",
+                "#20a36a",
+                "#f39c12",
+                "#9b59b6",
+                "#e74c3c",
+                "#34495e",
+                "#16a085"
+
+              ]
+
+            }
+
+          ]
+
+        },
+
+        options: {
+
+          responsive: true,
+
+          maintainAspectRatio: false,
+
+          plugins: {
+
+            legend: {
+
+              display: true,
+
+              position: "bottom"
+
+            }
+
+          }
+
+        }
+
+      }
+    );
+
+}
+
+
+/* ============================================================
+   DESTROY CHART
+============================================================ */
+
+function destroyChart(id) {
+
+  if (charts[id]) {
+
+    charts[id].destroy();
+
+    delete charts[id];
+
+  }
+
+}
+
+
+/* ============================================================
+   MAP SELECTION
+============================================================ */
+
+function updateSelectedFeature(
+  attributes
+) {
+
+  setText(
+    "summaryLocations",
+    "1 selected"
+  );
+
+
+  setText(
+    "summaryParking",
+    format(
+      Number(
+        attributes[FIELDS.parking]
+      ) || 0
+    )
+  );
+
+
+  setText(
+    "summaryArea",
+    format(
+      Math.round(
+        Number(
+          attributes[FIELDS.area]
+        ) || 0
+      )
+    ) + " sq ft"
+  );
+
+
+  const ev =
+
+    isYes(
+      attributes[FIELDS.heavyEV]
+    )
+
+    ||
+
+    isYes(
+      attributes[FIELDS.lightEV]
+    );
+
+
+  setText(
+    "summaryEV",
+    ev ? "Yes" : "No"
+  );
+
+
+  setText(
+    "summaryRepair",
+    isYes(
+      attributes[FIELDS.repair]
+    )
+      ? "Yes"
+      : "No"
+  );
+
+}
+
+
+/* ============================================================
+   CURRENT FILTER
+============================================================ */
+
+function updateCurrentFilter() {
+
+  const parts = [];
+
+
+  const filterDefinitions = [
+
+    ["countyFilter", "County"],
+
+    ["districtFilter", "District"],
+
+    ["cityFilter", "City"],
+
+    ["ownershipFilter", "Ownership"]
+
+  ];
+
+
+  filterDefinitions.forEach(
+    ([id, label]) => {
+
+      const value =
+        getValue(id);
+
+
+      if (value) {
+
+        parts.push(
+          `${label}: ${value}`
+        );
+
+      }
+
+    }
+  );
+
+
+  setText(
+    "currentFilter",
+    parts.length
+      ? parts.join(" | ")
+      : "All Records"
+  );
+
+}
+
+
+/* ============================================================
+   UTILITIES
+============================================================ */
+
+function sum(field) {
+
+  return filteredFeatures.reduce(
+    (total, feature) => {
+
+      const value =
+        Number(
+          feature.attributes[field]
+        );
+
+
+      return total +
+        (
+          Number.isFinite(value)
+            ? value
+            : 0
+        );
+
+    },
+    0
+  );
+
+}
+
+
+function isYes(value) {
+
+  if (
+    value === null ||
+    value === undefined
+  ) {
+    return false;
+  }
+
+
+  const v =
+    String(value)
+      .trim()
+      .toLowerCase();
+
+
+  return [
+
+    "yes",
+    "y",
+    "true",
+    "1",
+    "available",
+    "open"
+
+  ].includes(v);
+
+}
+
+
+function clean(value) {
+
+  if (
+    value === null ||
+    value === undefined
+  ) {
+
+    return "";
+
+  }
+
+
+  return String(value).trim();
+
+}
+
+
+function getValue(id) {
+
+  return document
+    .getElementById(id)
+    .value
+    .trim();
+
+}
+
+
+function format(value) {
+
+  return Number(
+    value || 0
+  ).toLocaleString();
+
+}
+
+
+function setText(id, value) {
+
+  const element =
+    document.getElementById(id);
+
+
+  if (element) {
+
+    element.textContent =
+      value;
+
+  }
+
+}
+
+
+/* ============================================================
+   STATUS
+============================================================ */
+
+function setStatus(
+  type,
+  message
+) {
 
   const dot =
-    document.getElementById("statusDot");
+    document.getElementById(
+      "statusDot"
+    );
+
 
   const text =
-    document.getElementById("connectionText");
+    document.getElementById(
+      "connectionText"
+    );
 
 
   dot.className =
     "status-dot";
-
-
-  if (type === "loading") {
-
-    dot.classList.add(
-      "status-loading"
-    );
-
-  }
 
 
   if (type === "success") {
@@ -824,7 +1988,8 @@ function setStatus(type, message) {
   }
 
 
-  text.innerText = message;
+  text.textContent =
+    message;
 
 }
 
@@ -835,21 +2000,15 @@ function setStatus(type, message) {
 
 function showError(error) {
 
-  const box =
-    document.getElementById("errorBox");
+  console.error(
+    error
+  );
 
 
-  let message = "";
+  let message;
 
 
-  if (error instanceof Error) {
-
-    message =
-      error.message;
-
-  }
-
-  else if (
+  if (
     error &&
     error.message
   ) {
@@ -882,1967 +2041,34 @@ function showError(error) {
   }
 
 
-  box.innerText =
-    "ArcGIS connection/query error:\n\n" +
+  document.getElementById(
+    "errorBox"
+  ).textContent =
+
+    "ArcGIS connection error:\n\n" +
+
     message;
 
 
-  box.style.display =
+  document.getElementById(
+    "errorBox"
+  ).style.display =
     "block";
 
 
   setStatus(
     "error",
-    "ArcGIS connection error"
+    "ArcGIS connection error — see details above"
   );
 
 }
 
 
 /* ============================================================
-   CLEAR ERROR
+   RUN
 ============================================================ */
 
-function clearError() {
-
-  const box =
-    document.getElementById("errorBox");
-
-  box.innerText = "";
-
-  box.style.display =
-    "none";
-
-}
-
-
-/* ============================================================
-   LOAD ARCGIS
-============================================================ */
-
-require([
-
-  "esri/Map",
-
-  "esri/views/MapView",
-
-  "esri/layers/FeatureLayer",
-
-  "esri/widgets/Legend",
-
-  "esri/widgets/Expand"
-
-], async function(
-
-  Map,
-
-  MapView,
-
-  FeatureLayer,
-
-  Legend,
-
-  Expand
-
-) {
-
-  try {
-
-    setStatus(
-      "loading",
-      "Connecting to ArcGIS Online..."
-    );
-
-
-    /* ========================================================
-       CREATE FEATURE LAYER
-    ======================================================== */
-
-    featureLayer =
-      new FeatureLayer({
-
-        url:
-          FEATURE_SERVICE_URL,
-
-        outFields:
-          ["*"],
-
-        popupTemplate: {
-
-          title:
-            "{CITY_NM}",
-
-          content: [
-
-            {
-
-              type:
-                "fields",
-
-              fieldInfos: [
-
-                {
-                  fieldName:
-                    "CNTY_NM",
-
-                  label:
-                    "County"
-                },
-
-                {
-                  fieldName:
-                    "DIST_NM",
-
-                  label:
-                    "District"
-                },
-
-                {
-                  fieldName:
-                    "CITY_NM",
-
-                  label:
-                    "City"
-                },
-
-                {
-                  fieldName:
-                    "Parking_Inventory",
-
-                  label:
-                    "Parking Inventory"
-                },
-
-                {
-                  fieldName:
-                    "OWNERSHIP",
-
-                  label:
-                    "Ownership"
-                },
-
-                {
-                  fieldName:
-                    "OPENTWENTYFOURHOUR",
-
-                  label:
-                    "Open 24 Hours"
-                },
-
-                {
-                  fieldName:
-                    "REPAIRFACILITIES",
-
-                  label:
-                    "Repair Facilities"
-                },
-
-                {
-                  fieldName:
-                    "HEAVYDUTY_EVCHARGE",
-
-                  label:
-                    "Heavy Duty EV Charging"
-                },
-
-                {
-                  fieldName:
-                    "LIGHTDUTY_EVCHARGE",
-
-                  label:
-                    "Light Duty EV Charging"
-                },
-
-                {
-                  fieldName:
-                    "SQFT_AREA",
-
-                  label:
-                    "Area (sq ft)"
-                }
-
-              ]
-
-            }
-
-          ]
-
-        }
-
-      });
-
-
-    /* ========================================================
-       WAIT FOR LAYER
-    ======================================================== */
-
-    await featureLayer.load();
-
-
-    console.log(
-      "ArcGIS FeatureLayer loaded:",
-      featureLayer
-    );
-
-
-    /* ========================================================
-       READ LAYER METADATA
-    ======================================================== */
-
-    objectIdField =
-      featureLayer.objectIdField ||
-      "OBJECTID";
-
-
-    if (featureLayer.fields) {
-
-      featureLayer.fields.forEach(
-        function(field) {
-
-          layerFields[
-            field.name
-          ] =
-            field;
-
-        }
-      );
-
-    }
-
-
-    console.log(
-      "Layer fields:",
-      Object.keys(layerFields)
-    );
-
-
-    /* ========================================================
-       VERIFY EXPECTED FIELDS
-    ======================================================== */
-
-    const missingFields =
-      EXPECTED_FIELDS.filter(
-        function(field) {
-
-          return !layerFields[field];
-
-        }
-      );
-
-
-    if (missingFields.length) {
-
-      console.warn(
-        "Expected fields not found:",
-        missingFields
-      );
-
-    }
-
-
-    /* ========================================================
-       CREATE MAP
-    ======================================================== */
-
-    map =
-      new Map({
-
-        basemap:
-          "gray-vector",
-
-        layers:
-          [featureLayer]
-
-      });
-
-
-    view =
-      new MapView({
-
-        container:
-          "viewDiv",
-
-        map:
-          map,
-
-        center:
-          [-98, 38],
-
-        zoom:
-          4
-
-      });
-
-
-    /* ========================================================
-       LEGEND
-    ======================================================== */
-
-    const legend =
-      new Legend({
-
-        view:
-          view,
-
-        layerInfos: [
-
-          {
-            layer:
-              featureLayer
-          }
-
-        ]
-
-      });
-
-
-    const legendExpand =
-      new Expand({
-
-        view:
-          view,
-
-        content:
-          legend,
-
-        expanded:
-          false
-
-      });
-
-
-    view.ui.add(
-      legendExpand,
-      "top-right"
-    );
-
-
-    /* ========================================================
-       LOAD DATA
-    ======================================================== */
-
-    setStatus(
-      "loading",
-      "Connected. Loading GIS records..."
-    );
-
-
-    await loadAllFeatures();
-
-
-    /* ========================================================
-       SUCCESS
-    ======================================================== */
-
-    setStatus(
-
-      "success",
-
-      "Connected — " +
-      allFeatures.length.toLocaleString() +
-      " features loaded"
-
-    );
-
-
-    document.getElementById(
-      "recordCount"
-    ).innerText =
-      allFeatures.length.toLocaleString();
-
-
-    filteredFeatures =
-      [...allFeatures];
-
-
-    populateFilters();
-
-    updateDashboard();
-
-
-    /* ========================================================
-       ZOOM TO DATA
-    ======================================================== */
-
-    if (allFeatures.length > 0) {
-
-      const extent =
-        featureLayer.fullExtent;
-
-
-      if (extent) {
-
-        await view.goTo(
-          extent.expand(1.15)
-        );
-
-      }
-
-    }
-
-
-    /* ========================================================
-       MAP CLICK
-    ======================================================== */
-
-    view.on(
-      "click",
-      async function(event) {
-
-        const response =
-          await view.hitTest(
-            event
-          );
-
-
-        const result =
-          response.results.find(
-            function(item) {
-
-              return (
-                item.graphic &&
-                item.graphic.layer ===
-                featureLayer
-              );
-
-            }
-          );
-
-
-        if (!result) {
-
-          return;
-
-        }
-
-
-        const attributes =
-          result.graphic.attributes;
-
-
-        updateSelectedFeature(
-          attributes
-        );
-
-      }
-    );
-
-
-  }
-
-  catch (error) {
-
-    console.error(
-      "Dashboard initialization failed:",
-      error
-    );
-
-    showError(error);
-
-  }
-
-});
-
-
-/* ============================================================
-   LOAD ALL FEATURES WITH PAGINATION
-============================================================ */
-
-async function loadAllFeatures() {
-
-  allFeatures = [];
-
-
-  let resultOffset = 0;
-
-  const pageSize =
-    1000;
-
-
-  while (true) {
-
-    const query = {
-
-      where:
-        "1=1",
-
-      outFields:
-        ["*"],
-
-      returnGeometry:
-        true,
-
-      resultOffset:
-        resultOffset,
-
-      resultRecordCount:
-        pageSize
-
-    };
-
-
-    console.log(
-      "Querying records starting at:",
-      resultOffset
-    );
-
-
-    const result =
-      await featureLayer.queryFeatures(
-        query
-      );
-
-
-    if (
-      !result ||
-      !result.features
-    ) {
-
-      throw new Error(
-        "ArcGIS returned no FeatureSet."
-      );
-
-    }
-
-
-    allFeatures.push(
-      ...result.features
-    );
-
-
-    console.log(
-      "Loaded:",
-      allFeatures.length,
-      "records"
-    );
-
-
-    if (
-      !result.exceededTransferLimit
-    ) {
-
-      break;
-
-    }
-
-
-    resultOffset +=
-      result.features.length;
-
-
-    if (
-      result.features.length === 0
-    ) {
-
-      break;
-
-    }
-
-  }
-
-
-  console.log(
-    "TOTAL FEATURES:",
-    allFeatures.length
-  );
-
-}
-
-
-/* ============================================================
-   POPULATE FILTERS
-============================================================ */
-
-function populateFilters() {
-
-  populateSelect(
-    "countyFilter",
-    "CNTY_NM",
-    "All Counties"
-  );
-
-
-  populateSelect(
-    "districtFilter",
-    "DIST_NM",
-    "All Districts"
-  );
-
-
-  populateSelect(
-    "cityFilter",
-    "CITY_NM",
-    "All Cities"
-  );
-
-
-  populateSelect(
-    "ownershipFilter",
-    "OWNERSHIP",
-    "All Ownership Types"
-  );
-
-}
-
-
-/* ============================================================
-   POPULATE SELECT
-============================================================ */
-
-function populateSelect(
-  elementId,
-  fieldName,
-  defaultText
-) {
-
-  const select =
-    document.getElementById(
-      elementId
-    );
-
-
-  select.innerHTML = "";
-
-
-  const defaultOption =
-    document.createElement(
-      "option"
-    );
-
-
-  defaultOption.value =
-    "";
-
-
-  defaultOption.textContent =
-    defaultText;
-
-
-  select.appendChild(
-    defaultOption
-  );
-
-
-  const values =
-    new Set();
-
-
-  allFeatures.forEach(
-    function(feature) {
-
-      const value =
-        feature.attributes[
-          fieldName
-        ];
-
-
-      if (
-        value !== null &&
-        value !== undefined &&
-        String(value).trim() !== ""
-      ) {
-
-        values.add(
-          String(value).trim()
-        );
-
-      }
-
-    }
-  );
-
-
-  Array.from(values)
-    .sort(
-      function(a, b) {
-
-        return a.localeCompare(
-          b
-        );
-
-      }
-    )
-    .forEach(
-      function(value) {
-
-        const option =
-          document.createElement(
-            "option"
-          );
-
-
-        option.value =
-          value;
-
-
-        option.textContent =
-          value;
-
-
-        select.appendChild(
-          option
-        );
-
-      }
-    );
-
-}
-
-
-/* ============================================================
-   FILTER EVENTS
-============================================================ */
-
-document
-  .getElementById(
-    "countyFilter"
-  )
-  .addEventListener(
-    "change",
-    applyFilters
-  );
-
-
-document
-  .getElementById(
-    "districtFilter"
-  )
-  .addEventListener(
-    "change",
-    applyFilters
-  );
-
-
-document
-  .getElementById(
-    "cityFilter"
-  )
-  .addEventListener(
-    "change",
-    applyFilters
-  );
-
-
-document
-  .getElementById(
-    "ownershipFilter"
-  )
-  .addEventListener(
-    "change",
-    applyFilters
-  );
-
-
-/* ============================================================
-   RESET
-============================================================ */
-
-document
-  .getElementById(
-    "resetButton"
-  )
-  .addEventListener(
-    "click",
-    function() {
-
-      document.getElementById(
-        "countyFilter"
-      ).value = "";
-
-
-      document.getElementById(
-        "districtFilter"
-      ).value = "";
-
-
-      document.getElementById(
-        "cityFilter"
-      ).value = "";
-
-
-      document.getElementById(
-        "ownershipFilter"
-      ).value = "";
-
-
-      if (featureLayer) {
-
-        featureLayer.definitionExpression =
-          "1=1";
-
-      }
-
-
-      filteredFeatures =
-        [...allFeatures];
-
-
-      updateDashboard();
-
-    }
-  );
-
-
-/* ============================================================
-   APPLY FILTERS
-============================================================ */
-
-function applyFilters() {
-
-  const county =
-    document.getElementById(
-      "countyFilter"
-    ).value;
-
-
-  const district =
-    document.getElementById(
-      "districtFilter"
-    ).value;
-
-
-  const city =
-    document.getElementById(
-      "cityFilter"
-    ).value;
-
-
-  const ownership =
-    document.getElementById(
-      "ownershipFilter"
-    ).value;
-
-
-  filteredFeatures =
-    allFeatures.filter(
-      function(feature) {
-
-        const a =
-          feature.attributes;
-
-
-        const countyMatch =
-          !county ||
-          String(
-            a.CNTY_NM || ""
-          ).trim() === county;
-
-
-        const districtMatch =
-          !district ||
-          String(
-            a.DIST_NM || ""
-          ).trim() === district;
-
-
-        const cityMatch =
-          !city ||
-          String(
-            a.CITY_NM || ""
-          ).trim() === city;
-
-
-        const ownershipMatch =
-          !ownership ||
-          String(
-            a.OWNERSHIP || ""
-          ).trim() === ownership;
-
-
-        return (
-          countyMatch &&
-          districtMatch &&
-          cityMatch &&
-          ownershipMatch
-        );
-
-      }
-    );
-
-
-  if (featureLayer) {
-
-    featureLayer.definitionExpression =
-      buildDefinitionExpression();
-
-  }
-
-
-  updateDashboard();
-
-}
-
-
-/* ============================================================
-   ARC GIS DEFINITION EXPRESSION
-============================================================ */
-
-function buildDefinitionExpression() {
-
-  const conditions = [];
-
-
-  const county =
-    document.getElementById(
-      "countyFilter"
-    ).value;
-
-
-  const district =
-    document.getElementById(
-      "districtFilter"
-    ).value;
-
-
-  const city =
-    document.getElementById(
-      "cityFilter"
-    ).value;
-
-
-  const ownership =
-    document.getElementById(
-      "ownershipFilter"
-    ).value;
-
-
-  if (county) {
-
-    conditions.push(
-      "CNTY_NM = '" +
-      escapeSQL(county) +
-      "'"
-    );
-
-  }
-
-
-  if (district) {
-
-    conditions.push(
-      "DIST_NM = '" +
-      escapeSQL(district) +
-      "'"
-    );
-
-  }
-
-
-  if (city) {
-
-    conditions.push(
-      "CITY_NM = '" +
-      escapeSQL(city) +
-      "'"
-    );
-
-  }
-
-
-  if (ownership) {
-
-    conditions.push(
-      "OWNERSHIP = '" +
-      escapeSQL(ownership) +
-      "'"
-    );
-
-  }
-
-
-  return conditions.length
-    ? conditions.join(
-        " AND "
-      )
-    : "1=1";
-
-}
-
-
-/* ============================================================
-   SQL ESCAPE
-============================================================ */
-
-function escapeSQL(value) {
-
-  return String(value)
-    .replace(
-      /'/g,
-      "''"
-    );
-
-}
-
-
-/* ============================================================
-   UPDATE DASHBOARD
-============================================================ */
-
-function updateDashboard() {
-
-  updateKPIs();
-
-  updateSummary();
-
-  updateCharts();
-
-  updateCurrentFilter();
-
-}
-
-
-/* ============================================================
-   KPI CALCULATIONS
-============================================================ */
-
-function updateKPIs() {
-
-  const total =
-    filteredFeatures.length;
-
-
-  const parking =
-    sumField(
-      "Parking_Inventory"
-    );
-
-
-  const area =
-    sumField(
-      "SQFT_AREA"
-    );
-
-
-  const open24 =
-    filteredFeatures.filter(
-      function(feature) {
-
-        return isYes(
-          feature.attributes
-            .OPENTWNTYFOURHOUR
-        );
-
-      }
-    ).length;
-
-
-  const ev =
-    filteredFeatures.filter(
-      function(feature) {
-
-        return (
-
-          isYes(
-            feature.attributes
-              .HEAVYDUTY_EVCHARGE
-          )
-
-          ||
-
-          isYes(
-            feature.attributes
-              .LIGHTDUTY_EVCHARGE
-          )
-
-        );
-
-      }
-    ).length;
-
-
-  setText(
-    "totalLocations",
-    formatNumber(total)
-  );
-
-
-  setText(
-    "totalParking",
-    formatNumber(parking)
-  );
-
-
-  setText(
-    "totalArea",
-    formatNumber(
-      Math.round(area)
-    )
-  );
-
-
-  setText(
-    "open24",
-    formatNumber(open24)
-  );
-
-
-  setText(
-    "evLocations",
-    formatNumber(ev)
-  );
-
-}
-
-
-/* ============================================================
-   SUMMARY
-============================================================ */
-
-function updateSummary() {
-
-  const parking =
-    sumField(
-      "Parking_Inventory"
-    );
-
-
-  const area =
-    sumField(
-      "SQFT_AREA"
-    );
-
-
-  const ev =
-    filteredFeatures.filter(
-      function(feature) {
-
-        return (
-
-          isYes(
-            feature.attributes
-              .HEAVYDUTY_EVCHARGE
-          )
-
-          ||
-
-          isYes(
-            feature.attributes
-              .LIGHTDUTY_EVCHARGE
-          )
-
-        );
-
-      }
-    ).length;
-
-
-  const repair =
-    filteredFeatures.filter(
-      function(feature) {
-
-        return isYes(
-          feature.attributes
-            .REPAIRFACILITIES
-        );
-
-      }
-    ).length;
-
-
-  setText(
-    "summaryLocations",
-    formatNumber(
-      filteredFeatures.length
-    )
-  );
-
-
-  setText(
-    "summaryParking",
-    formatNumber(parking)
-  );
-
-
-  setText(
-    "summaryArea",
-    formatNumber(
-      Math.round(area)
-    ) + " sq ft"
-  );
-
-
-  setText(
-    "summaryEV",
-    formatNumber(ev)
-  );
-
-
-  setText(
-    "summaryRepair",
-    formatNumber(repair)
-  );
-
-}
-
-
-/* ============================================================
-   SUM FIELD
-============================================================ */
-
-function sumField(fieldName) {
-
-  return filteredFeatures.reduce(
-    function(total, feature) {
-
-      const value =
-        Number(
-          feature.attributes[
-            fieldName
-          ]
-        );
-
-
-      return total +
-        (
-          Number.isFinite(value)
-            ? value
-            : 0
-        );
-
-    },
-    0
-  );
-
-}
-
-
-/* ============================================================
-   CHARTS
-============================================================ */
-
-function updateCharts() {
-
-  updateCountyChart();
-
-  updateParkingChart();
-
-  updateOwnershipChart();
-
-  updateEVChart();
-
-  updateOpen24Chart();
-
-  updateRepairChart();
-
-}
-
-
-/* ============================================================
-   COUNTY COUNT
-============================================================ */
-
-function updateCountyChart() {
-
-  const data =
-    groupCount(
-      "CNTY_NM"
-    );
-
-
-  createChart(
-    "countyChart",
-    "bar",
-    Object.keys(data),
-    Object.values(data),
-    "#187db8"
-  );
-
-}
-
-
-/* ============================================================
-   PARKING BY COUNTY
-============================================================ */
-
-function updateParkingChart() {
-
-  const data = {};
-
-
-  filteredFeatures.forEach(
-    function(feature) {
-
-      const county =
-        cleanValue(
-          feature.attributes
-            .CNTY_NM,
-          "Unknown"
-        );
-
-
-      const parking =
-        Number(
-          feature.attributes
-            .Parking_Inventory
-        ) || 0;
-
-
-      data[county] =
-        (
-          data[county] || 0
-        ) + parking;
-
-    }
-  );
-
-
-  createChart(
-    "parkingChart",
-    "bar",
-    Object.keys(data),
-    Object.values(data),
-    "#20a36a"
-  );
-
-}
-
-
-/* ============================================================
-   OWNERSHIP
-============================================================ */
-
-function updateOwnershipChart() {
-
-  const data =
-    groupCount(
-      "OWNERSHIP"
-    );
-
-
-  createChart(
-    "ownershipChart",
-    "doughnut",
-    Object.keys(data),
-    Object.values(data),
-    [
-      "#187db8",
-      "#20a36a",
-      "#f39c12",
-      "#9b59b6",
-      "#e74c3c",
-      "#34495e",
-      "#16a085"
-    ]
-  );
-
-}
-
-
-/* ============================================================
-   EV
-============================================================ */
-
-function updateEVChart() {
-
-  let heavy = 0;
-
-  let light = 0;
-
-  let none = 0;
-
-
-  filteredFeatures.forEach(
-    function(feature) {
-
-      const heavyEV =
-        isYes(
-          feature.attributes
-            .HEAVYDUTY_EVCHARGE
-        );
-
-
-      const lightEV =
-        isYes(
-          feature.attributes
-            .LIGHTDUTY_EVCHARGE
-        );
-
-
-      if (heavyEV) {
-        heavy++;
-      }
-
-
-      if (lightEV) {
-        light++;
-      }
-
-
-      if (
-        !heavyEV &&
-        !lightEV
-      ) {
-        none++;
-      }
-
-    }
-  );
-
-
-  createChart(
-    "evChart",
-    "doughnut",
-    [
-      "Heavy Duty EV",
-      "Light Duty EV",
-      "No EV Charging"
-    ],
-    [
-      heavy,
-      light,
-      none
-    ],
-    [
-      "#e67e22",
-      "#3498db",
-      "#bdc3c7"
-    ]
-  );
-
-}
-
-
-/* ============================================================
-   24 HOUR
-============================================================ */
-
-function updateOpen24Chart() {
-
-  let yes = 0;
-
-  let no = 0;
-
-
-  filteredFeatures.forEach(
-    function(feature) {
-
-      if (
-        isYes(
-          feature.attributes
-            .OPENTWNTYFOURHOUR
-        )
-      ) {
-
-        yes++;
-
-      }
-
-      else {
-
-        no++;
-
-      }
-
-    }
-  );
-
-
-  createChart(
-    "open24Chart",
-    "doughnut",
-    [
-      "Open 24 Hours",
-      "Not 24 Hours"
-    ],
-    [
-      yes,
-      no
-    ],
-    [
-      "#20a36a",
-      "#bdc3c7"
-    ]
-  );
-
-}
-
-
-/* ============================================================
-   REPAIR
-============================================================ */
-
-function updateRepairChart() {
-
-  let yes = 0;
-
-  let no = 0;
-
-
-  filteredFeatures.forEach(
-    function(feature) {
-
-      if (
-        isYes(
-          feature.attributes
-            .REPAIRFACILITIES
-        )
-      ) {
-
-        yes++;
-
-      }
-
-      else {
-
-        no++;
-
-      }
-
-    }
-  );
-
-
-  createChart(
-    "repairChart",
-    "doughnut",
-    [
-      "Repair Facilities",
-      "No Repair Facilities"
-    ],
-    [
-      yes,
-      no
-    ],
-    [
-      "#8e44ad",
-      "#bdc3c7"
-    ]
-  );
-
-}
-
-
-/* ============================================================
-   GROUP COUNT
-============================================================ */
-
-function groupCount(fieldName) {
-
-  const result = {};
-
-
-  filteredFeatures.forEach(
-    function(feature) {
-
-      const value =
-        cleanValue(
-          feature.attributes[
-            fieldName
-          ],
-          "Unknown"
-        );
-
-
-      result[value] =
-        (
-          result[value] || 0
-        ) + 1;
-
-    }
-  );
-
-
-  return result;
-
-}
-
-
-/* ============================================================
-   CREATE CHART
-============================================================ */
-
-function createChart(
-
-  canvasId,
-  type,
-  labels,
-  data,
-  colors
-
-) {
-
-  const canvas =
-    document.getElementById(
-      canvasId
-    );
-
-
-  if (charts[canvasId]) {
-
-    charts[canvasId].destroy();
-
-  }
-
-
-  charts[canvasId] =
-    new Chart(
-      canvas,
-      {
-
-        type:
-
-          type,
-
-        data: {
-
-          labels:
-
-            labels,
-
-          datasets: [
-
-            {
-
-              data:
-
-                data,
-
-              backgroundColor:
-
-                colors,
-
-              borderColor:
-
-                "#ffffff",
-
-              borderWidth:
-
-                1
-
-            }
-
-          ]
-
-        },
-
-
-        options: {
-
-          responsive:
-            true,
-
-          maintainAspectRatio:
-            false,
-
-          plugins: {
-
-            legend: {
-
-              display:
-                type === "doughnut",
-
-              position:
-                "bottom"
-
-            }
-
-          },
-
-
-          scales:
-
-            type === "bar"
-
-              ? {
-
-                  x: {
-
-                    ticks: {
-
-                      autoSkip:
-                        true,
-
-                      maxRotation:
-                        45,
-
-                      minRotation:
-                        0
-
-                    }
-
-                  },
-
-                  y: {
-
-                    beginAtZero:
-                      true
-
-                  }
-
-                }
-
-              : {}
-
-        }
-
-      }
-    );
-
-}
-
-
-/* ============================================================
-   MAP FEATURE SELECTION
-============================================================ */
-
-function updateSelectedFeature(
-  attributes
-) {
-
-  const parking =
-    Number(
-      attributes
-        .Parking_Inventory
-    ) || 0;
-
-
-  const area =
-    Number(
-      attributes
-        .SQFT_AREA
-    ) || 0;
-
-
-  setText(
-    "summaryLocations",
-    "1 selected"
-  );
-
-
-  setText(
-    "summaryParking",
-    formatNumber(
-      parking
-    )
-  );
-
-
-  setText(
-    "summaryArea",
-    formatNumber(
-      Math.round(area)
-    ) + " sq ft"
-  );
-
-
-  const ev =
-
-    isYes(
-      attributes
-        .HEAVYDUTY_EVCHARGE
-    )
-
-    ||
-
-    isYes(
-      attributes
-        .LIGHTDUTY_EVCHARGE
-    );
-
-
-  setText(
-    "summaryEV",
-    ev ? "Yes" : "No"
-  );
-
-
-  setText(
-    "summaryRepair",
-    isYes(
-      attributes
-        .REPAIRFACILITIES
-    )
-      ? "Yes"
-      : "No"
-  );
-
-}
-
-
-/* ============================================================
-   CURRENT FILTER
-============================================================ */
-
-function updateCurrentFilter() {
-
-  const parts = [];
-
-
-  const county =
-    document.getElementById(
-      "countyFilter"
-    ).value;
-
-
-  const district =
-    document.getElementById(
-      "districtFilter"
-    ).value;
-
-
-  const city =
-    document.getElementById(
-      "cityFilter"
-    ).value;
-
-
-  const ownership =
-    document.getElementById(
-      "ownershipFilter"
-    ).value;
-
-
-  if (county) {
-
-    parts.push(
-      "County: " + county
-    );
-
-  }
-
-
-  if (district) {
-
-    parts.push(
-      "District: " + district
-    );
-
-  }
-
-
-  if (city) {
-
-    parts.push(
-      "City: " + city
-    );
-
-  }
-
-
-  if (ownership) {
-
-    parts.push(
-      "Ownership: " + ownership
-    );
-
-  }
-
-
-  setText(
-    "currentFilter",
-
-    parts.length
-      ? parts.join(" | ")
-      : "All Records"
-  );
-
-}
-
-
-/* ============================================================
-   YES / NO HANDLER
-============================================================ */
-
-function isYes(value) {
-
-  if (
-    value === null ||
-    value === undefined
-  ) {
-
-    return false;
-
-  }
-
-
-  const normalized =
-    String(value)
-      .trim()
-      .toLowerCase();
-
-
-  return (
-
-    normalized === "yes" ||
-
-    normalized === "y" ||
-
-    normalized === "true" ||
-
-    normalized === "1" ||
-
-    normalized === "available" ||
-
-    normalized === "open"
-
-  );
-
-}
-
-
-/* ============================================================
-   CLEAN VALUE
-============================================================ */
-
-function cleanValue(
-  value,
-  fallback
-) {
-
-  if (
-    value === null ||
-    value === undefined ||
-    String(value).trim() === ""
-  ) {
-
-    return fallback;
-
-  }
-
-
-  return String(
-    value
-  ).trim();
-
-}
-
-
-/* ============================================================
-   FORMAT NUMBER
-============================================================ */
-
-function formatNumber(value) {
-
-  return Number(
-    value || 0
-  ).toLocaleString();
-
-}
-
-
-/* ============================================================
-   SET TEXT
-============================================================ */
-
-function setText(
-  elementId,
-  value
-) {
-
-  const element =
-    document.getElementById(
-      elementId
-    );
-
-
-  if (element) {
-
-    element.innerText =
-      value;
-
-  }
-
-}
+startDashboard();
 
 </script>
 
