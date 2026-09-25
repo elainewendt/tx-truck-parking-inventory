@@ -1,50 +1,77 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8" />
+  <title>Truck Parking Dashboard</title>
+
+  <link rel="stylesheet" href="https://js.arcgis.com/4.31/esri/themes/light/main.css">
+
+  <style>
+    html, body {
+      margin: 0;
+      height: 100%;
+      width: 100%;
+      font-family: Arial, sans-serif;
+    }
+
+    #header {
+      height: 60px;
+      background: #005a9c;
+      color: white;
+      display: flex;
+      align-items: center;
+      padding-left: 20px;
+      font-size: 22px;
+      font-weight: bold;
+    }
+
+    #count {
+      position: absolute;
+      top: 80px;
+      left: 20px;
+      background: white;
+      padding: 15px;
+      z-index: 99;
+      border-radius: 8px;
+      box-shadow: 0 2px 8px rgba(0,0,0,.2);
+    }
+
+    #viewDiv {
+      height: calc(100% - 60px);
+      width: 100%;
+    }
+  </style>
+
+  <script src="https://js.arcgis.com/4.31/"></script>
+</head>
+
+<body>
+
+<div id="header">
+  Texas Truck Parking Inventory
+</div>
+
+<div id="count">
+  Facilities: <span id="facilityCount">Loading...</span>
+</div>
+
+<div id="viewDiv"></div>
+
 <script>
 
 require([
   "esri/Map",
   "esri/views/MapView",
   "esri/layers/FeatureLayer"
-], function (Map, MapView, FeatureLayer) {
+], function(Map, MapView, FeatureLayer) {
 
-  const truckLayer = new FeatureLayer({
-
-    url: "https://services.arcgis.com/KTcxiTD9dsQw4r7Z/arcgis/rest/services/Truck_Parking_Inventory/FeatureServer/2",
-
-    outFields: ["*"],
-
-    popupTemplate: {
-      title: "{CITY_NM}",
-      content: `
-        <b>County:</b> {CNTY_NM}<br>
-        <b>District:</b> {DIST_NM}<br>
-        <b>Parking Spaces:</b> {Parking_Inventory}<br>
-        <b>Ownership:</b> {OWNERSHIP}<br>
-        <b>Nearest Interstate:</b> {NEAREST_IH}<br>
-        <b>24 Hour:</b> {OPENTWNTYFOURHOUR}<br>
-        <b>Repair Facilities:</b> {REPAIRFACILITIES}<br>
-        <b>Heavy Duty Fuel:</b> {HEAVYDUTYLIQUIDFUEL}<br>
-        <b>Heavy Duty EV:</b> {HEAVYDUTY_EVCHARGE}
-      `
-    }
-
+  const layer = new FeatureLayer({
+    url: "https://services.arcgis.com/KTcxiTD9dsQw4r7Z/arcgis/rest/services/Truck_Parking_Inventory/FeatureServer/2"
   });
-
-  truckLayer.when(function() {
-    console.log("Layer loaded");
-    console.log("Full extent:", truckLayer.fullExtent);
-  });
-
-  truckLayer.queryFeatureCount()
-    .then(function(count) {
-      console.log("Feature count:", count);
-    })
-    .catch(function(error) {
-      console.error("Query error:", error);
-    });
 
   const map = new Map({
-    basemap: "hybrid",
-    layers: [truckLayer]
+    basemap: "streets-vector",
+    layers: [layer]
   });
 
   const view = new MapView({
@@ -52,74 +79,6 @@ require([
     map: map
   });
 
-  view.when(async () => {
+  layer.when(async () => {
 
-    const extent = await truckLayer.queryExtent();
-
-    console.log(extent);
-
-    if (extent.extent) {
-      view.goTo(extent.extent.expand(1.2));
-    }
-
-  });
-
-  truckLayer.when(async () => {
-
-    document.getElementById("status").innerHTML =
-      "Layer Loaded";
-
-    try {
-
-      const count =
-        await truckLayer.queryFeatureCount();
-
-      document.getElementById("facilityCount").innerHTML =
-        count.toLocaleString();
-
-      const results =
-        await truckLayer.queryFeatures({
-          where: "1=1",
-          outFields: ["Parking_Inventory"],
-          returnGeometry: false
-        });
-
-      let totalSpaces = 0;
-
-      results.features.forEach(f => {
-        totalSpaces +=
-          f.attributes.Parking_Inventory || 0;
-      });
-
-      document.getElementById("spaceCount").innerHTML =
-        totalSpaces.toLocaleString();
-
-      await view.goTo(truckLayer.fullExtent);
-
-      console.log(
-        "Feature count:",
-        count
-      );
-
-    }
-    catch (err) {
-
-      console.error(err);
-
-      document.getElementById("status").innerHTML =
-        "Query Error";
-
-    }
-
-  }).catch(err => {
-
-    console.error(err);
-
-    document.getElementById("status").innerHTML =
-      "Layer Failed";
-
-  });
-
-});
-
-</script>
+    const count = await layer.queryFeatureCount
