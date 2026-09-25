@@ -1,84 +1,125 @@
-<!DOCTYPE html>
-<html>
+<script>
 
-<head>
-  <meta charset="utf-8">
-  <title>Texas Truck Parking Inventory Dashboard</title>
+require([
+  "esri/Map",
+  "esri/views/MapView",
+  "esri/layers/FeatureLayer"
+], function (Map, MapView, FeatureLayer) {
 
-  <link rel="stylesheet"
-        href="https://js.arcgis.com/4.31/esri/themes/light/main.css">
+  const truckLayer = new FeatureLayer({
 
-  <style>
-    html, body {
-      margin: 0;
-      padding: 0;
-      height: 100%;
-      width: 100%;
-      font-family: Arial, sans-serif;
+    url: "https://services.arcgis.com/KTcxiTD9dsQw4r7Z/arcgis/rest/services/Truck_Parking_Inventory/FeatureServer/2",
+
+    outFields: ["*"],
+
+    popupTemplate: {
+      title: "{CITY_NM}",
+      content: `
+        <b>County:</b> {CNTY_NM}<br>
+        <b>District:</b> {DIST_NM}<br>
+        <b>Parking Spaces:</b> {Parking_Inventory}<br>
+        <b>Ownership:</b> {OWNERSHIP}<br>
+        <b>Nearest Interstate:</b> {NEAREST_IH}<br>
+        <b>24 Hour:</b> {OPENTWNTYFOURHOUR}<br>
+        <b>Repair Facilities:</b> {REPAIRFACILITIES}<br>
+        <b>Heavy Duty Fuel:</b> {HEAVYDUTYLIQUIDFUEL}<br>
+        <b>Heavy Duty EV:</b> {HEAVYDUTY_EVCHARGE}
+      `
     }
 
-    #header {
-      height: 60px;
-      background: #005a9c;
-      color: white;
-      display: flex;
-      align-items: center;
-      padding-left: 20px;
-      font-size: 22px;
-      font-weight: bold;
+  });
+
+  truckLayer.when(function() {
+    console.log("Layer loaded");
+    console.log("Full extent:", truckLayer.fullExtent);
+  });
+
+  truckLayer.queryFeatureCount()
+    .then(function(count) {
+      console.log("Feature count:", count);
+    })
+    .catch(function(error) {
+      console.error("Query error:", error);
+    });
+
+  const map = new Map({
+    basemap: "hybrid",
+    layers: [truckLayer]
+  });
+
+  const view = new MapView({
+    container: "viewDiv",
+    map: map
+  });
+
+  view.when(async () => {
+
+    const extent = await truckLayer.queryExtent();
+
+    console.log(extent);
+
+    if (extent.extent) {
+      view.goTo(extent.extent.expand(1.2));
     }
 
-    #container {
-      display: flex;
-      height: calc(100% - 60px);
+  });
+
+  truckLayer.when(async () => {
+
+    document.getElementById("status").innerHTML =
+      "Layer Loaded";
+
+    try {
+
+      const count =
+        await truckLayer.queryFeatureCount();
+
+      document.getElementById("facilityCount").innerHTML =
+        count.toLocaleString();
+
+      const results =
+        await truckLayer.queryFeatures({
+          where: "1=1",
+          outFields: ["Parking_Inventory"],
+          returnGeometry: false
+        });
+
+      let totalSpaces = 0;
+
+      results.features.forEach(f => {
+        totalSpaces +=
+          f.attributes.Parking_Inventory || 0;
+      });
+
+      document.getElementById("spaceCount").innerHTML =
+        totalSpaces.toLocaleString();
+
+      await view.goTo(truckLayer.fullExtent);
+
+      console.log(
+        "Feature count:",
+        count
+      );
+
+    }
+    catch (err) {
+
+      console.error(err);
+
+      document.getElementById("status").innerHTML =
+        "Query Error";
+
     }
 
-    #sidebar {
-      width: 320px;
-      background: #f5f5f5;
-      padding: 15px;
-      overflow-y: auto;
-      box-sizing: border-box;
-    }
+  }).catch(err => {
 
-    #viewDiv {
-      flex: 1;
-    }
+    console.error(err);
 
-    .card {
-      background: white;
-      padding: 12px;
-      margin-bottom: 12px;
-      border-radius: 8px;
-      box-shadow: 0 2px 5px rgba(0,0,0,.15);
-    }
+    document.getElementById("status").innerHTML =
+      "Layer Failed";
 
-    .title {
-      font-size: 14px;
-      color: #666;
-    }
+  });
 
-    .metric {
-      font-size: 30px;
-      font-weight: bold;
-      color: #005a9c;
-    }
-  </style>
+});
 
-  <script src="https://js.arcgis.com/4.31/"></script>
-</head>
-
-<body>
-
-<div id="header">
-  Texas Truck Parking Inventory Dashboard
-</div>
-
-<div id="container">
-
-  <div id="sidebar">
-
-    <div class="card">
-      <div class="title">Total Facilities</div>
-      <div id="facilityCount" class="metric">...</div>
-    </
+</script>
